@@ -2,8 +2,6 @@ from dash import html, dcc, Input, Output
 
 from app import app
 from components.data_table import create_data_table
-from components.graph import create_graph
-from components.date_picker import date_picker
 from tab_input_selection import create_tab_input_selection
 
 
@@ -20,21 +18,28 @@ app.layout = html.Div([
         ],
         vertical=False
     ),
-    html.Div(id='tab-output')
+    # Load all tab contents here but control visibility through a callback
+    html.Div(
+        [
+            html.Div(create_tab_input_selection(), id='tab-1-content', style={'display': 'block'}),
+            html.Div(create_data_table(), id='tab-2-content', style={'display': 'none'}),
+            html.Div("asdf", id='tab-3-content', style={'display': 'none'}),
+            html.Div("asdf", id='tab-4-content', style={'display': 'none'}),
+            html.Div("Estimate content goes here", id='tab-5-content', style={'display': 'none'}),
+        ],
+        id='tab-content-container'
+    )
 ], style={'width': '80%', 'fontFamily': 'Sans-Serif', 'margin-left': 'auto', 'margin-right': 'auto'})
 
-tabs = {
-    '1': create_tab_input_selection(),
-    '2': create_data_table(),
-    '3': None,
-    '4': None,
-    '5': None
-}
 
-# Callback to switch between tabs and update content
-@app.callback(Output('tab-output', 'children'), [Input('tabs', 'value')])
-def display_content(value):
-    return tabs[value]
+# Callback to toggle visibility based on selected tab
+@app.callback(
+    [Output(f'tab-{i}-content', 'style') for i in range(1, 6)],
+    [Input('tabs', 'value')]
+)
+def display_content(selected_tab):
+    # Set 'display' to 'block' for the selected tab and 'none' for others
+    return [{'display': 'block' if selected_tab == str(i) else 'none'} for i in range(1, 6)]
 
 
 if __name__ == '__main__':

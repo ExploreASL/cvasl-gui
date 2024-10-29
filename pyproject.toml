@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cvasl-gui"
+version = "0.1.0"
+description = "A GUI for the cvasl package"
+authors = ["Peter Kok <p.kok@esciencecenter.nl>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dash = "^2.18.1"
+pandas = "^2.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

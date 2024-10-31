@@ -319,8 +319,13 @@ ol ul {
   margin: 1.5rem 0 1.5rem 3rem;
   font-size: 90%; }
 li {
+  list-style-type: '';
+  display: 'flex';
+  align-items: 'center';
   margin-bottom: 1rem; }
-
+li > div {
+  display: 'inline-block';
+}
 
 /* Tables
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

@@ -27,12 +27,12 @@ def create_data_table():
         page_action='none'
     )
 
-# Callback to update table based on age and salary filters
-@app.callback(
-    Output('table', 'data'),
-    [Input('age-range-slider', 'value'), Input('salary-range-slider', 'value')]
-)
-def update_table(age_range, salary_range):
-    filtered_df = df[(df['Age'] >= age_range[0]) & (df['Age'] <= age_range[1]) &
-                     (df['Salary'] >= salary_range[0]) & (df['Salary'] <= salary_range[1])]
-    return filtered_df.to_dict('records')
+# # Callback to update table based on age and salary filters
+# @app.callback(
+#     Output('table', 'data'),
+#     [Input('age-range-slider', 'value'), Input('salary-range-slider', 'value')]
+# )
+# def update_table(age_range, salary_range):
+#     filtered_df = df[(df['Age'] >= age_range[0]) & (df['Age'] <= age_range[1]) &
+#                      (df['Salary'] >= salary_range[0]) & (df['Salary'] <= salary_range[1])]
+#     return filtered_df.to_dict('records')

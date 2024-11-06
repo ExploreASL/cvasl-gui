@@ -3,6 +3,7 @@ import dash
 from dash import dcc, html, Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash.dependencies import ALL
+import pandas as pd
 from app import app
 import data_store
 
@@ -20,16 +21,6 @@ def create_directory_input():
         html.Div(id='file-contents-container')  # Display contents of file
     ])
 
-
-# Callback to initialize the directory input with the global variable's value
-@app.callback(
-    Output('directory-path-input', 'value'),
-    Input('scan-button', 'n_clicks')  # Triggered on load or initial interaction
-)
-def initialize_directory_input(n_clicks):
-    return data_store.selected_directory
-
-
 @app.callback(
     Output('file-list-container', 'children'),
     Input('scan-button', 'n_clicks'),
@@ -38,8 +29,6 @@ def initialize_directory_input(n_clicks):
 def scan_directory(n_clicks, directory_path):
     if not n_clicks or not directory_path:
         raise PreventUpdate
-    
-    data_store.selected_directory = directory_path
 
     # Check if the directory exists
     if not os.path.isdir(directory_path):
@@ -75,6 +64,7 @@ def open_file(n_clicks, directory_path):
 
     # Identify the button clicked by extracting its index from ctx
     clicked_button = ctx.triggered[0]['prop_id']
+    print(clicked_button)
     index = int(eval(clicked_button.split('.')[0])['index'])
 
     # Retrieve the list of files and select the file based on the index
@@ -82,11 +72,9 @@ def open_file(n_clicks, directory_path):
     file_name = files[index]
 
     # Open and read the file contents
-    with open(os.path.join(directory_path, file_name), 'r') as file:
-        file_contents = file.read()
-        print (file_contents)
+    file_path = os.path.join(directory_path, file_name)
+    data_store.all_data = pd.read_csv(file_path)
 
     return html.Div([
-        html.H5(f"Contents of {file_name}:"),
-        html.Pre(file_contents)
+        html.H5(f"Loaded {file_name}")
     ])

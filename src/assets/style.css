@@ -178,11 +178,6 @@ a:hover {
 /* Buttons
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .button,
-button {
-  background-color: #cde4eb !important;
-}
-
-.button,
 button,
 input[type="submit"],
 input[type="reset"],

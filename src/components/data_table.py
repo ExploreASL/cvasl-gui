@@ -7,7 +7,7 @@ import data_store
 
 def create_data_table():
     return dash_table.DataTable(
-        id='table',
+        id='data-table',
         columns=[
             {'name': 'participant_id', 'id': 'participant_id', 'type': 'text'},
             {'name': 'ID', 'id': 'ID', 'type': 'text'},
@@ -23,7 +23,7 @@ def create_data_table():
     )
 
 @app.callback(
-    Output('table', 'data'),
+    Output('data-table', 'data'),
     Input('file-contents-container', 'children')
 )
 def update_table(data):

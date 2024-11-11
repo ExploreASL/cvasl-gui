@@ -14,3 +14,13 @@ html {
 #tab-content-container {
   margin: 20px;
 }
+
+#data-table {
+  font-size: 14px;
+  line-height: 14px;
+}
+
+#data-table td {
+  padding-top: 0;
+  padding-bottom: 0;
+}

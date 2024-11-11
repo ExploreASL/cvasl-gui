@@ -19,11 +19,13 @@ def create_data_table():
         filter_action='native',
         sort_action='native',
         sort_mode='multi',
-        page_action='none'
+        page_action='native',  # Enable pagination
+        page_size=20
     )
 
 @app.callback(
     Output('data-table', 'data'),
+    Output('data-table', 'columns'),
     Input('file-contents-container', 'children')
 )
 def update_table(data):
@@ -31,4 +33,5 @@ def update_table(data):
         raise PreventUpdate
 
     df = data_store.all_data
-    return df.to_dict('records')
+    columns = [{'name': col, 'id': col} for col in df.columns]
+    return df.to_dict('records'), columns

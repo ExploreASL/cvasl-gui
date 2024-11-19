@@ -31,15 +31,23 @@ layout = html.Div([
 
 @app.callback(
     Output('scatter-x-axis', 'options'),
+    Output('scatter-x-axis', 'value'),
     Output('scatter-y-axis', 'options'),
+    Output('scatter-y-axis', 'value'),
     Output('scatter-group-by', 'options'),
+    Output('scatter-group-by', 'value'),
     Input('btn-scatter', 'n_clicks')
 )
 def update_scatter_dropdowns(n_clicks):
-    if not hasattr(data_store, 'all_data') or data_store.all_data is None:
-        return [], [], []
-    columns = [{'label': col, 'value': col} for col in data_store.all_data.columns]
-    return columns, columns, columns
+    df = data_store.all_data
+    if not hasattr(data_store, 'all_data') or df is None:
+        return [], None, [], None, [], None
+
+    columns = [{'label': col, 'value': col} for col in df.columns]
+    default_x_column = 'Age' if 'Age' in df.columns else None
+    default_y_column = df.columns[5] if len(df.columns) > 5 else None
+    default_group_column = 'Site' if 'Site' in df.columns else None
+    return columns, default_x_column, columns, default_y_column, columns, default_group_column
 
 
 @app.callback(

@@ -26,14 +26,20 @@ layout = html.Div([
 
 @app.callback(
     Output('violin-y-axis', 'options'),
+    Output('violin-y-axis', 'value'),
     Output('violin-group-by', 'options'),
+    Output('violin-group-by', 'value'),
     Input('btn-violin', 'n_clicks')
 )
 def update_violin_dropdowns(n_clicks):
-    if not hasattr(data_store, 'all_data') or data_store.all_data is None:
-        return [], []
-    columns = [{'label': col, 'value': col} for col in data_store.all_data.columns]
-    return columns, columns
+    df = data_store.all_data
+    if not hasattr(data_store, 'all_data') or df is None:
+        return [], None, [], None
+
+    columns = [{'label': col, 'value': col} for col in df.columns]
+    default_y_axis = 'Age' if 'Age' in df.columns else None
+    default_group_by = 'Site' if 'Site' in df.columns else None
+    return columns, default_y_axis, columns, default_group_by
 
 
 @app.callback(

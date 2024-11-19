@@ -28,8 +28,8 @@ app.layout = html.Div(
         html.Div(
             [
                 html.Div(create_tab_input_selection(), id='tab-1-content', style={'display': 'block'}),
-                html.Div(create_tab_data_inspection(), id='tab-2-content', style={'display': 'block'}),
-                html.Div(create_tab_compare(), id='tab-3-content', style={'display': 'block'}),
+                html.Div(create_tab_data_inspection(), id='tab-2-content', style={'display': 'none'}),
+                html.Div(create_tab_compare(), id='tab-3-content', style={'display': 'none'}),
                 html.Div("asdf", id='tab-4-content', style={'display': 'none'}),
                 html.Div("Estimate content goes here", id='tab-5-content', style={'display': 'none'}),
             ],

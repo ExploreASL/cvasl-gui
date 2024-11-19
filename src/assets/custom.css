@@ -24,3 +24,15 @@ html {
   padding-top: 0;
   padding-bottom: 0;
 }
+
+.plot-button {
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.plot-button.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}

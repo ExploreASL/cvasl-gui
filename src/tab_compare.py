@@ -1,88 +1,85 @@
-import plotly.express as px
-import pandas as pd
-from dash import html, dcc, Input, Output, State
-from dash.exceptions import PreventUpdate
+import dash
+from dash import Dash, html, dcc, Input, Output
+from components.plots import violin_plot
+from components.plots import box_plot
+from components.plots import scatter_plot
 from app import app
-import data_store
 
 
 def create_tab_compare():
     return html.Div([
-        create_violin_plot_component()
-    ])
 
-def create_violin_plot_component():
-    return html.Div([
+        # Plot selection
         html.Div([
-            html.Div([
-                html.Label("Column to plot"),
-                dcc.Dropdown(
-                    id='column-dropdown',
-                    placeholder="Select a column",
-                    style={'width': '100%'}
-                )
-            ], style={'flex': '1', 'margin-right': '10px'}),  # Adjust width and add spacing
+            html.Button("Violin Plot", id='btn-violin', n_clicks=0, className='plot-button'),
+            html.Button("Box Plot", id='btn-box', n_clicks=0, className='plot-button'),
+            html.Button("Scatter Plot", id='btn-scatter', n_clicks=0, className='plot-button'),
+        ], style={'display': 'flex', 'gap': '10px', 'justify-content': 'center'}),
 
-            html.Div([
-                html.Label("Group by"),
-                dcc.Dropdown(
-                    id='group-by-dropdown',
-                    placeholder="Select a column",
-                    style={'width': '100%'}
-                )
-            ], style={'flex': '1'})
-        ], style={'display': 'flex', 'width': '80%', 'gap': '10px', 'padding': '10px 0'}),
-
-        dcc.Graph(id='violin-plot')
+        # Plot container
+        html.Div([
+            html.Div(violin_plot.layout, id='plot-1', style={'display': 'block'}),
+            html.Div(box_plot.layout, id='plot-2', style={'display': 'none'}),
+            html.Div(scatter_plot.layout, id='plot-3', style={'display': 'none'})
+        ], id='plot-container')
     ])
 
 
+# Callback to toggle visibility based on selected plot
 @app.callback(
-    Output('column-dropdown', 'options'),
-    Output('group-by-dropdown', 'options'),
-    Input('data-table', 'data'), # This feels a bit hacky, using it as a trigger
-    State('file-list', 'value')
+    [Output(f'plot-{i}', 'style') for i in range(1, 4)],
+    [Input('btn-violin', 'n_clicks'),
+     Input('btn-box', 'n_clicks'),
+     Input('btn-scatter', 'n_clicks')]
 )
-def update_dropdown_options(n_clicks, selected_file):
-    if n_clicks == 0 or selected_file is None:
-        raise PreventUpdate
+def display_content(btn_violin, btn_box, btn_scatter):
+    # Determine which button has been clicked most recently
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]  # Default: show violin plot
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    # Check if data is loaded and get column names
-    if isinstance(data_store.all_data, pd.DataFrame):
-        columns = [{'label': col, 'value': col} for col in data_store.all_data.columns]
-        return columns, columns
+    # Map buttons to plots
+    if button_id == 'btn-violin':
+        return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+    elif button_id == 'btn-box':
+        return [{'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+    elif button_id == 'btn-scatter':
+        return [{'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
 
-    return [], []
+    return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]  # Fallback
 
 
+# Callback to update button styles (highlight the selected button)
 @app.callback(
-    Output('violin-plot', 'figure'),
-    Input('column-dropdown', 'value'),
-    Input('group-by-dropdown', 'value')
+    Output('btn-violin', 'className'),
+    Output('btn-box', 'className'),
+    Output('btn-scatter', 'className'),
+    Input('btn-violin', 'n_clicks'),
+    Input('btn-box', 'n_clicks'),
+    Input('btn-scatter', 'n_clicks')
 )
-def update_violin_plot(selected_column, group_by_column):
-    if not selected_column:
-        raise PreventUpdate
+def update_button_styles(btn_violin, btn_box, btn_scatter):
+    plot_type = get_plot_type(btn_violin, btn_box, btn_scatter)
 
-    # Ensure data is loaded
-    if hasattr(data_store, 'all_data') and isinstance(data_store.all_data, pd.DataFrame):
-        data = data_store.all_data
+    # Highlight the selected button
+    return (
+        'plot-button selected' if plot_type == 'violin' else 'plot-button',
+        'plot-button selected' if plot_type == 'box' else 'plot-button',
+        'plot-button selected' if plot_type == 'scatter' else 'plot-button'
+    )
 
-        # Check if the selected column is valid
-        if selected_column in data.columns:
-            # If group_by_column is selected, use it for grouping
-            if group_by_column and group_by_column in data.columns:
-                fig = px.violin(data, y=selected_column, color=group_by_column, box=True, points="all")
-                fig.update_layout(
-                    title=f"Violin Plot of {selected_column} grouped by {group_by_column}",
-                    yaxis_title=selected_column
-                )
-            else:
-                fig = px.violin(data, y=selected_column, box=True, points="all")
-                fig.update_layout(
-                    title=f"Violin Plot of {selected_column}",
-                    yaxis_title=selected_column
-                )
-            return fig
 
-    return px.Figure()  # Return an empty figure if no data is available
+def get_plot_type(btn_violin, btn_box, btn_scatter):
+    # Determine which button was clicked most recently
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return 'violin'  # Default to violin plot
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    if button_id == 'btn-violin':
+        return 'violin'
+    elif button_id == 'btn-box':
+        return 'box'
+    elif button_id == 'btn-scatter':
+        return 'scatter'
+    return 'violin'  # Fallback to default

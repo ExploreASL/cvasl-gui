@@ -1,0 +1,49 @@
+from dash import html, dcc, Input, Output
+from app import app
+import plotly.express as px
+import data_store
+
+
+layout = html.Div([
+    html.Div([
+        html.Label("Column to plot"),
+        dcc.Dropdown(
+            id='box-y-axis',
+            placeholder="Select a column"
+        ),
+        html.Label("Group by"),
+        dcc.Dropdown(
+            id='box-group-by',
+            placeholder="Select a column"
+        )
+    ], style={'flex': '1', 'padding': '10px'}),
+
+    html.Div([
+        dcc.Graph(id='box-plot')
+    ], style={'flex': '2', 'padding': '10px'})
+], style={'display': 'flex', 'width': '100%'})
+
+
+@app.callback(
+    Output('box-y-axis', 'options'),
+    Output('box-group-by', 'options'),
+    Input('btn-box', 'n_clicks')
+)
+def update_box_dropdowns(n_clicks):
+    if not hasattr(data_store, 'all_data') or data_store.all_data is None:
+        return [], []
+    columns = [{'label': col, 'value': col} for col in data_store.all_data.columns]
+    return columns, columns
+
+
+@app.callback(
+    Output('box-plot', 'figure'),
+    Input('box-y-axis', 'value'),
+    Input('box-group-by', 'value')
+)
+def update_box_plot(y_axis, group_by):
+    if not y_axis:
+        return {}
+    data = data_store.all_data
+    fig = px.box(data, y=y_axis, color=group_by)
+    return fig

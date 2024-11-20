@@ -36,9 +36,9 @@ layout = html.Div([
     Output('scatter-y-axis', 'value'),
     Output('scatter-group-by', 'options'),
     Output('scatter-group-by', 'value'),
-    Input('btn-scatter', 'n_clicks')
+    Input('data-table', 'data')
 )
-def update_scatter_dropdowns(n_clicks):
+def update_scatter_dropdowns(data):
     df = data_store.all_data
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None, [], None

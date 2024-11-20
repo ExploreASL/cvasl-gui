@@ -29,9 +29,9 @@ layout = html.Div([
     Output('violin-y-axis', 'value'),
     Output('violin-group-by', 'options'),
     Output('violin-group-by', 'value'),
-    Input('btn-violin', 'n_clicks')
+    Input('data-table', 'data')
 )
-def update_violin_dropdowns(n_clicks):
+def update_violin_dropdowns(data):
     df = data_store.all_data
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None

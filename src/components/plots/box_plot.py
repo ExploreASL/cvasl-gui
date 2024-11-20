@@ -29,9 +29,9 @@ layout = html.Div([
     Output('box-y-axis', 'value'),
     Output('box-group-by', 'options'),
     Output('box-group-by', 'value'),
-    Input('btn-box', 'n_clicks')
+    Input('data-table', 'data')
 )
-def update_box_dropdowns(n_clicks):
+def update_box_dropdowns(data):
     df = data_store.all_data
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None

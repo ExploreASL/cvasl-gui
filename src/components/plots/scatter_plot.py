@@ -60,5 +60,5 @@ def update_scatter_plot(x_axis, y_axis, group_by):
     if not x_axis or not y_axis:
         return {}
     data = data_store.all_data
-    fig = px.scatter(data, x=x_axis, y=y_axis, color=group_by)
+    fig = px.scatter(data, x=x_axis, y=y_axis, color=group_by, trendline='ols')
     return fig

@@ -1,9 +1,9 @@
 import dash
 from dash import Dash, html, dcc, Input, Output
-from components.plots import violin_plot
-from components.plots import box_plot
-from components.plots import scatter_plot
-from app import app
+from cvasl_gui.components.plots import violin_plot
+from cvasl_gui.components.plots import box_plot
+from cvasl_gui.components.plots import scatter_plot
+from cvasl_gui.app import app
 
 
 def create_tab_compare():

@@ -1,8 +1,8 @@
 import pandas as pd
 from dash import Input, Output, dash_table
 from dash.exceptions import PreventUpdate
-from app import app
-import data_store
+from cvasl_gui.app import app
+from cvasl_gui import data_store
 
 
 def create_data_table():

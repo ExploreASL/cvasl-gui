@@ -2,8 +2,8 @@ import os
 from dash import dcc, html, Input, Output, State
 from dash.exceptions import PreventUpdate
 import pandas as pd
-from app import app
-import data_store
+from cvasl_gui.app import app
+from cvasl_gui import data_store
 
 
 def create_directory_input():

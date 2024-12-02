@@ -1,10 +1,10 @@
 from dash import html, dcc, Input, Output
 
-import data_store
-from app import app
-from tab_data_inspection import create_tab_data_inspection
-from tab_input_selection import create_tab_input_selection
-from tab_compare import create_tab_compare
+from cvasl_gui import data_store
+from cvasl_gui.app import app
+from cvasl_gui.tab_data_inspection import create_tab_data_inspection
+from cvasl_gui.tab_input_selection import create_tab_input_selection
+from cvasl_gui.tab_compare import create_tab_compare
 
 data_store.all_data = None
 data_store.selected_directory = None
@@ -48,5 +48,9 @@ def display_content(selected_tab):
     return [{'display': 'block' if selected_tab == str(i) else 'none'} for i in range(1, 6)]
 
 
-if __name__ == '__main__':
+def main():
     app.run_server(debug=True)
+
+
+if __name__ == '__main__':
+    main()

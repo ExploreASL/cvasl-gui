@@ -1,7 +1,7 @@
 from dash import html, dcc, Input, Output
-from app import app
+from cvasl_gui.app import app
 import plotly.express as px
-import data_store
+from cvasl_gui import data_store
 
 
 layout = html.Div([

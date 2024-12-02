@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cvasl-gui"
-version = "0.1.1"
+version = "0.1.2"
 description = "A GUI for the cvasl package"
 authors = ["Peter Kok <p.kok@esciencecenter.nl>"]
 license = "Apache 2.0"
@@ -12,6 +12,8 @@ dash = "^2.18.1"
 pandas = "^2.2.3"
 statsmodels = "^0.14.4"
 
+[tool.poetry.scripts]
+cvasl-gui = "cvasl_gui.index:main"
 
 [build-system]
 requires = ["poetry-core"]

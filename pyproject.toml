@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cvasl-gui"
-version = "0.1.0"
+version = "0.1.1"
 description = "A GUI for the cvasl package"
 authors = ["Peter Kok <p.kok@esciencecenter.nl>"]
 license = "Apache 2.0"

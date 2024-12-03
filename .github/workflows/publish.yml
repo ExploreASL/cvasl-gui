@@ -50,66 +50,66 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
 
-  github-release:
-    name: Sign distribution and create GitHub release
-    needs: [build-and-test, create-tag]
-    runs-on: ubuntu-latest
+  # github-release:
+  #   name: Sign distribution and create GitHub release
+  #   needs: [build-and-test, create-tag]
+  #   runs-on: ubuntu-latest
 
-    permissions:
-      contents: write  # mandatory for making GitHub Releases
-      id-token: write  # mandatory for sigstore
+  #   permissions:
+  #     contents: write  # mandatory for making GitHub Releases
+  #     id-token: write  # mandatory for sigstore
 
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts
-        path: dist/
+  #   steps:
+  #   - name: Download all the dists
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       name: build-artifacts
+  #       path: dist/
 
-    - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v2.1.1
-      with:
-        inputs: >-
-          ./dist/*.tar.gz
-          ./dist/*.whl
+  #   - name: Sign the dists with Sigstore
+  #     uses: sigstore/gh-action-sigstore-python@v2.1.1
+  #     with:
+  #       inputs: >-
+  #         ./dist/*.tar.gz
+  #         ./dist/*.whl
 
-    - name: Create GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-        VERSION: ${{ needs.build-and-test.outputs.version }}
-      run: >-
-        gh release create
-        "v${VERSION}"
-        --repo '${{ github.repository }}'
-        --notes ""
+  #   - name: Create GitHub Release
+  #     env:
+  #       GITHUB_TOKEN: ${{ github.token }}
+  #       VERSION: ${{ needs.build-and-test.outputs.version }}
+  #     run: >-
+  #       gh release create
+  #       "v${VERSION}"
+  #       --repo '${{ github.repository }}'
+  #       --notes ""
 
-    - name: Upload artifact signatures to GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-        VERSION: ${{ needs.build-and-test.outputs.version }}
-      # Upload to GitHub Release using the `gh` CLI.
-      # `dist/` contains the built packages, and the
-      # sigstore-produced signatures and certificates.
-      run: >-
-        gh release upload
-        "v${VERSION}" dist/**
-        --repo '${{ github.repository }}'
+  #   - name: Upload artifact signatures to GitHub Release
+  #     env:
+  #       GITHUB_TOKEN: ${{ github.token }}
+  #       VERSION: ${{ needs.build-and-test.outputs.version }}
+  #     # Upload to GitHub Release using the `gh` CLI.
+  #     # `dist/` contains the built packages, and the
+  #     # sigstore-produced signatures and certificates.
+  #     run: >-
+  #       gh release upload
+  #       "v${VERSION}" dist/**
+  #       --repo '${{ github.repository }}'
 
 
-  publish-docs:
-    name: Publish documentation
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download the documentation
-        uses: actions/download-artifact@v4
-        with:
-          name: docs-html
-          path: docs/
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/
+  # publish-docs:
+  #   name: Publish documentation
+  #   needs: build-and-test
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - name: Download the documentation
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: docs-html
+  #         path: docs/
+  #     - name: Deploy
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: docs/

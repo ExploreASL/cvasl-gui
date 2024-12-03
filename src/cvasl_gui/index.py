@@ -1,3 +1,8 @@
+import os
+import webbrowser
+from threading import Timer
+from dotenv import load_dotenv
+
 from dash import html, dcc, Input, Output
 
 from cvasl_gui import data_store
@@ -49,7 +54,18 @@ def display_content(selected_tab):
 
 
 def main():
-    app.run_server(debug=True)
+    # Load environment variables
+    load_dotenv()
+    port = os.getenv('CVASL_PORT', 8767)
+    debug_mode = os.getenv('CVASL_DEBUG_MODE', False)
+
+    # Schedule a timer to open the browser
+    if not debug_mode: # we don't want to relaunch on every change
+        url = f"http://127.0.0.1:{port}/"
+        Timer(1, lambda: webbrowser.open(url)).start()
+
+    # Start the Dash server
+    app.run_server(port=port, debug=debug_mode)
 
 
 if __name__ == '__main__':

@@ -8,9 +8,9 @@ from dash import html, dcc, Input, Output
 
 from cvasl_gui import data_store
 from cvasl_gui.app import app
-from cvasl_gui.tab_data_inspection import create_tab_data_inspection
-from cvasl_gui.tab_input_selection import create_tab_input_selection
-from cvasl_gui.tab_compare import create_tab_compare
+from cvasl_gui.tabs.data_inspection import create_tab_data_inspection
+from cvasl_gui.tabs.input_selection import create_tab_input_selection
+from cvasl_gui.tabs.compare import create_tab_compare
 
 data_store.all_data = None
 data_store.selected_directory = None
@@ -70,6 +70,7 @@ def main():
         Timer(1, lambda: webbrowser.open(url)).start()
         
         # Start the server using waitress
+        print(f"Starting server at {url}")
         serve(app.server, host=host, port=port, threads=8) 
 
 

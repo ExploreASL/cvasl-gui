@@ -11,6 +11,7 @@ from cvasl_gui.app import app
 from cvasl_gui.tabs.data_inspection import create_tab_data_inspection
 from cvasl_gui.tabs.input_selection import create_tab_input_selection
 from cvasl_gui.tabs.compare import create_tab_compare
+from cvasl_gui.tabs.harmonization import create_tab_harmonization
 
 data_store.all_data = None
 data_store.selected_directory = None
@@ -36,7 +37,7 @@ app.layout = html.Div(
                 html.Div(create_tab_input_selection(), id='tab-1-content', style={'display': 'block'}),
                 html.Div(create_tab_data_inspection(), id='tab-2-content', style={'display': 'none'}),
                 html.Div(create_tab_compare(), id='tab-3-content', style={'display': 'none'}),
-                html.Div("asdf", id='tab-4-content', style={'display': 'none'}),
+                html.Div(create_tab_harmonization(), id='tab-4-content', style={'display': 'none'}),
                 html.Div("Estimate content goes here", id='tab-5-content', style={'display': 'none'}),
             ],
             id='tab-content-container'

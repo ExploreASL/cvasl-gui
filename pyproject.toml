@@ -13,6 +13,7 @@ pandas = "^2.2.3"
 statsmodels = "^0.14.4"
 python-dotenv = "^1.0.1"
 waitress = "^3.0.2"
+cvasl = "^0.2.0"
 
 [tool.poetry.scripts]
 cvasl-gui = "cvasl_gui.index:main"

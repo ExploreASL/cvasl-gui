@@ -16,7 +16,8 @@ def create_tab_harmonization():
     return html.Div([
         html.Button("Start Job", id="start-button", n_clicks=0),
         html.Div(id="job-status"),
-        dcc.Interval(id="interval-check", interval=3000, n_intervals=0)
+        dcc.Interval(id="interval-check", interval=3000, n_intervals=0),
+        dcc.Download(id="download-data")
     ])
 
 def run_job():
@@ -36,7 +37,6 @@ def run_job():
         "id": job_id,
         "process": process.pid,
         "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "status": "running"
     }
     with open(os.path.join(job_folder, "job_details.json"), "w") as f:
         json.dump(job_details, f)
@@ -59,9 +59,9 @@ def check_job_status():
                 with open(status_file) as f:
                     details["status"] = f.read()
 
-            # # Check if process is still running
-            # process_id = details.get("process")
-            # details["running"] = os.path.exists(f"/proc/{process_id}")
+            # Check if process is still running
+            process_id = details.get("process")
+            details["running"] = is_process_running(process_id)
 
             job_data.append(details)
 
@@ -92,6 +92,14 @@ def remove_job(job_id):
                 os.rmdir(os.path.join(root, dir))
         os.rmdir(job_folder)
 
+def is_process_running(pid):
+    """Check if a process is running"""
+    try:
+        result = subprocess.run(["ps", "-p", str(pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.returncode == 0  # Return True if process is found
+    except Exception as e:
+        print(f"Error checking process: {e}")
+        return False
 
 @app.callback(
     Output("job-status", "children"),
@@ -126,6 +134,7 @@ def start_or_monitor_job(n_clicks, n_intervals, cancel_clicks, remove_clicks, ca
 
     table_header = html.Tr([
         html.Th("Job ID"),
+        html.Th("Running?"),
         html.Th("Status"),
         html.Th("Start Time"),
         html.Th("Download"),
@@ -136,12 +145,35 @@ def start_or_monitor_job(n_clicks, n_intervals, cancel_clicks, remove_clicks, ca
     table_rows = [
         html.Tr([
             html.Td(job.get("id", "")),
+            html.Td("Yes" if job.get("running", False) else "No"),
             html.Td(job.get("status", "")),
             html.Td(job.get("start_time", "")),
-            html.Td(html.A("Download", href=f"/{OUTPUT_FOLDER}/{job['id']}", target="_blank")),
-            html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0)),
-            html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0))
+            html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") == "completed" else ""),
+            html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0) if job.get("running", False) else ""),
+            html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0) if not job.get("running", False) else "")
         ]) for job in job_data
     ]
 
     return html.Table([table_header] + table_rows, style={"width": "100%", "border": "1px solid black"})
+
+@app.callback(
+    Output("download-data", "data"),
+    Input({"type": "download-output", "index": ALL}, "n_clicks"),
+    State({"type": "download-output", "index": ALL}, "id"),
+    prevent_initial_call=True,
+)
+def func(n_clicks, ids):
+    if not ctx.triggered_id or not isinstance(ctx.triggered_id, dict):
+        return dash.no_update  # Prevent unnecessary execution
+
+    triggered_id = ctx.triggered_id
+    if triggered_id["type"] == "download-output":
+        job_id = triggered_id["index"]
+        path = os.path.join(OUTPUT_FOLDER, job_id, "output.zip")
+        
+        # Ensure the button was actually clicked this time
+        index = [id["index"] for id in ids].index(job_id)
+        if n_clicks[index] > 0:
+            return dcc.send_file(path)
+
+    return dash.no_update  # Avoid unwanted triggers

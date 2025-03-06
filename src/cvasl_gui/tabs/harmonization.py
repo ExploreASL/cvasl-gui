@@ -168,12 +168,12 @@ def func(n_clicks, ids):
 
     triggered_id = ctx.triggered_id
     if triggered_id["type"] == "download-output":
-        job_id = triggered_id["index"]
-        path = os.path.join(OUTPUT_FOLDER, job_id, "output.zip")
-        
+
         # Ensure the button was actually clicked this time
+        job_id = triggered_id["index"]
         index = [id["index"] for id in ids].index(job_id)
         if n_clicks[index] > 0:
+            path = os.path.join(OUTPUT_FOLDER, job_id, "output.zip")
             return dcc.send_file(path)
 
     return dash.no_update  # Avoid unwanted triggers

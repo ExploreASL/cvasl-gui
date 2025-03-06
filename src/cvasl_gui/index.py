@@ -59,7 +59,7 @@ def main():
     # Load environment variables
     load_dotenv()
     port = int(os.getenv('CVASL_PORT', 8767))
-    debug_mode = bool(os.getenv('CVASL_DEBUG_MODE', False) == 'True')
+    debug_mode = os.getenv('CVASL_DEBUG_MODE', 'False') == 'True'
     host = '127.0.0.1'
 
     # Start the server and open the browser

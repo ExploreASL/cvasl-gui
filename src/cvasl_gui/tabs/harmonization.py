@@ -28,11 +28,21 @@ def run_job():
     job_folder = os.path.join(OUTPUT_FOLDER, job_id)
     os.makedirs(job_folder, exist_ok=True)
 
+    # Save job arguments
+    job_arguments = {
+        "input_paths": ["/Users/peter/repos/brainage/data-workshop/TestingData_Site1_fake.csv"],
+        "harmonization_features": ["GM_vol", "WM_vol"],
+        "covariate_features": ["Age","Sex","Site"]
+    }
+    with open(os.path.join(job_folder, "job_arguments.json"), "w") as f:
+        json.dump(job_arguments, f)
+
     # Start the job
     print("Starting job", job_id)
     script_path = os.path.join(os.path.dirname(__file__), "..", "jobs", "harmonization_job.py")
     process = subprocess.Popen(["python", script_path, job_id])
 
+    # Save job details (so it can be monitored)
     job_details = {
         "id": job_id,
         "process": process.pid,

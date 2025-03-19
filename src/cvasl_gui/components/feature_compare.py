@@ -6,7 +6,7 @@ from cvasl_gui.components.plots import scatter_plot
 from cvasl_gui.app import app
 
 
-def create_tab_compare():
+def create_feature_compare():
     return html.Div([
 
         # Plot selection

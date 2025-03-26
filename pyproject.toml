@@ -14,6 +14,9 @@ statsmodels = "^0.14.4"
 python-dotenv = "^1.0.1"
 waitress = "^3.0.2"
 dash-bootstrap-components = "1.7.1"
+# TODO: these packages should be installed by cvasl:
+neuroharmonize = "^2.4.5"
+neurocombat = "^0.2.12"
 
 [tool.poetry.scripts]
 cvasl-gui = "cvasl_gui.index:main"

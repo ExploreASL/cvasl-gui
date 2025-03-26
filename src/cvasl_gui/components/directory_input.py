@@ -8,44 +8,63 @@ from cvasl_gui import data_store
 
 def create_directory_input():
     return html.Div([
-        html.Div(id='file-list-container', children=[dcc.RadioItems(
+        html.Div(id='file-list-container', children=[dcc.Checklist(
             id='file-list',
             options=[],  # populated via callback
             labelStyle={'display': 'block'},
-            style={'overflowY': 'scroll', 'height': '200px'}
+            inputStyle={'marginRight': '5px'},
+            inline=True
         )]),
-        html.Div([html.Button('Load Selected File', id='load-button', className='button button-primary', n_clicks=0)]),
         html.Div(id='file-contents-container')
     ], style={'display': 'flex', 'flex-direction': 'column', 'gap': '10px'})
 
 
-FIXED_DIR = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data')  # change to your actual folder name
+FIXED_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data'))  # adjust as needed
 
 @app.callback(
     Output('file-list', 'options'),
-    Input('file-list', 'id')  # dummy input that fires once when layout is ready
+    Input('file-list', 'id')  # dummy trigger on page load
 )
 def populate_file_list(_):
     if not os.path.isdir(FIXED_DIR):
         return [{'label': 'Directory not found', 'value': '', 'disabled': True}]
     
-    files = os.listdir(FIXED_DIR)
-    return [{'label': f, 'value': f} for f in files if os.path.isfile(os.path.join(FIXED_DIR, f))]
+    files = sorted([
+        f for f in os.listdir(FIXED_DIR)
+        if os.path.isfile(os.path.join(FIXED_DIR, f)) and f.endswith('.csv')
+    ])
+    return [{'label': f, 'value': f} for f in files]
+
 
 
 @app.callback(
     Output('file-contents-container', 'children'),
-    Input('load-button', 'n_clicks'),
-    State('file-list', 'value')
+    Input('file-list', 'value')  # triggered on checklist change
 )
-def load_file(n_clicks, selected_file):
-    if n_clicks == 0 or not selected_file:
+def load_selected_files(selected_files):
+    if not selected_files:
         raise PreventUpdate
 
-    file_path = os.path.join(FIXED_DIR, selected_file)
-    try:
-        data_store.all_data = pd.read_csv(file_path)
-    except Exception as e:
-        return html.Div([f"Error loading file: {e}"], style={'color': 'red'})
+    dfs = []
+    input_files = []
+    errors = []
+    for fname in selected_files:
+        file_path = os.path.join(FIXED_DIR, fname)
+        input_files.append(file_path)
+        try:
+            df = pd.read_csv(file_path)
+            dfs.append(df)
+        except Exception as e:
+            errors.append(f"Error loading {fname}: {e}")
 
-    return html.Div([html.Span(f"Loaded {selected_file}")])
+    data_store.input_files = input_files
+    if dfs:
+        data_store.all_data = pd.concat(dfs, ignore_index=True)
+    else:
+        data_store.all_data = pd.DataFrame()  # empty fallback
+
+    return html.Div([
+        html.Div(f"Loaded files: {', '.join(selected_files)}"),
+        html.Div(f"{len(data_store.all_data)} rows loaded"),
+        *([html.Div(e, style={'color': 'red'}) for e in errors] if errors else [])
+    ])

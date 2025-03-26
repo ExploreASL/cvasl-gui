@@ -70,14 +70,13 @@ def start_job(n_clicks, selected_features):
     if not selected_features:
         return dash.no_update
 
-    # # Start job in a separate thread
-    # threading.Thread(target=run_job, daemon=True).start()
-
     job_arguments = {
-        "input_paths": ["/Users/peter/repos/brainage/data-workshop/TestingData_Site1_fake.csv"],
+        "input_paths": data_store.input_files,
         "harmonization_features": selected_features,
         "covariate_features": ["Age","Sex","Site"]
     }
-    run_job(job_arguments)
+
+    # # Start job in a separate thread
+    threading.Thread(target=run_job, args=(job_arguments,), daemon=True).start()
 
     return dash.no_update

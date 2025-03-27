@@ -25,6 +25,38 @@ def get_dataframe_columns():
     return df.columns
 
 
+def create_harmonization_parameters():
+    return [
+    # Row for main feature selection
+    dbc.Row([
+        dbc.Col(html.Label("Features:", style={"marginTop": "6px"}), width=3),
+        dbc.Col(
+            dcc.Dropdown(
+                id="feature-dropdown",
+                options=[{"label": col, "value": col} for col in get_dataframe_columns()],
+                multi=True,
+                placeholder="Select features...",
+            ),
+        ),
+    ], className="mb-3"),
+
+    # Row for covariate features
+    dbc.Row([
+        dbc.Col(html.Label("Covariate Features:", style={"marginTop": "6px"}), width=3),
+        dbc.Col(
+            dcc.Dropdown(
+                id="covariate-dropdown",
+                options=[{"label": col, "value": col} for col in get_dataframe_columns()],
+                multi=True,
+                placeholder="Select covariates...",
+            ),
+        ),
+    ], className="mb-3"),
+
+    html.Button("Start Job", id="start-button", n_clicks=0)
+    ]
+
+
 def create_tab_harmonization():
     return html.Div([
         dbc.Accordion([
@@ -34,19 +66,8 @@ def create_tab_harmonization():
                 title="Inspect data"),
             dbc.AccordionItem([create_feature_compare()],
                 title="Feature comparison"),
-            dbc.AccordionItem([
-                html.H3("Features to Harmonize"),
-        
-                # Feature selection dropdown
-                dcc.Dropdown(
-                    id="feature-dropdown",
-                    options=[{"label": col, "value": col} for col in get_dataframe_columns()],
-                    multi=True,
-                    placeholder="Select features...",
-                ),
-
-                html.Button("Start Job", id="start-button", n_clicks=0),
-            ], title="Harmonization"),
+            dbc.AccordionItem(create_harmonization_parameters(),
+                title="Harmonization"),
             dbc.AccordionItem([create_job_list()],
                 title="Runs")
         ], always_open=True)
@@ -62,21 +83,32 @@ def update_feature_dropdown(data):
 
 
 @app.callback(
-    Input("start-button", "n_clicks"),
-    State("feature-dropdown", "value"),
+    Output("covariate-dropdown", "options"),
+    Input("data-table", "data"),
     prevent_initial_call=True
 )
-def start_job(n_clicks, selected_features):
+def update_covariate_dropdown(data):
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+
+@app.callback(
+    Input("start-button", "n_clicks"),
+    State("feature-dropdown", "value"),
+    State("covariate-dropdown", "value"),
+    prevent_initial_call=True
+)
+def start_job(n_clicks, selected_features, covariate_features):
     if not selected_features:
         return dash.no_update
 
     job_arguments = {
         "input_paths": data_store.input_files,
         "harmonization_features": selected_features,
-        "covariate_features": ["Age","Sex","Site"]
+        "covariate_features": covariate_features,
+        "site_indicator": "Site"
     }
 
-    # # Start job in a separate thread
+    # Start job in a separate thread
     threading.Thread(target=run_job, args=(job_arguments,), daemon=True).start()
 
     return dash.no_update

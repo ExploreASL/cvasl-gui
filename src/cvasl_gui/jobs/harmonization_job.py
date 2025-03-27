@@ -43,14 +43,17 @@ def run_harmonization() -> None:
         job_arguments = json.load(f)
 
     input_paths = job_arguments["input_paths"]
-    mri_datasets = [MRIdataset(input_path, "1", "participant_id") for input_path in input_paths]
-
     harmonization_features = job_arguments["harmonization_features"]
     covariate_features = job_arguments["covariate_features"]
+    site_indicator = job_arguments["site_indicator"]
+
+    print("Running harmonization")
+    print("Input paths:", input_paths)
+    print("Harmonization features:", harmonization_features)
+    print("Covariate features:", covariate_features)
 
     # Perform harmonization
-    # data1 = MRIdataset("/Users/peter/repos/brainage/data-workshop/TestingData_Site1_fake.csv", "1", "participant_id")   
-    #harmonizer = NeuroHarmonize(["GM_vol", "WM_vol"], ["Age","Sex","Site"], [], "Site", True)
+    mri_datasets = [MRIdataset(input_path, "1", "participant_id") for input_path in input_paths]
     harmonizer = NeuroHarmonize(harmonization_features, covariate_features, [], "Site", True)
     output = harmonizer.harmonize(mri_datasets)
 

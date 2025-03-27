@@ -65,6 +65,7 @@ def check_job_status():
 
     for job_dir in job_dirs:
         job_details_file = os.path.join(OUTPUT_FOLDER, job_dir, "job_details.json")
+        job_arguments_file = os.path.join(OUTPUT_FOLDER, job_dir, "job_arguments.json")
         if os.path.exists(job_details_file):
             # Load the job details
             with open(job_details_file) as f:
@@ -79,6 +80,12 @@ def check_job_status():
             # Check if process is still running
             process_id = details.get("process")
             details["running"] = is_process_running(process_id)
+
+            # Load job arguments
+            if os.path.exists(job_arguments_file):
+                with open(job_arguments_file) as f:
+                    job_arguments = json.load(f)
+                    details["arguments"] = job_arguments
 
             job_data.append(details)
 
@@ -146,7 +153,6 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
     table_header = html.Tr([
         html.Th("Start time"),
         html.Th("Inputs"),
-        html.Th("Algorithm / run"),
         html.Th("Status"),
         html.Th("Select"),
 
@@ -166,13 +172,12 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
 #            html.Td(job.get("id", "")),
 #            html.Td("Yes" if job.get("running", False) else "No"),
             html.Td(job.get("start_time", "")),
-            html.Td("/Users/peter/repos/brainage/data-workshop/TestingData_Site1_fake.csv"),
-            html.Td("NeuroHarmonize"),
+            html.Td(", ".join(job.get("arguments", {}).get("input_paths", []))),
             html.Td(job.get("status", "")),
             html.Td(html.Button("Select", id={"type": "select-job", "index": job["id"]}, n_clicks=0)),
-            # html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") == "completed" else ""),
-            # html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0) if job.get("running", False) else ""),
-            # html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0) if not job.get("running", False) else "")
+            html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") == "completed" else ""),
+            html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0) if job.get("running", False) else ""),
+            html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0) if not job.get("running", False) else "")
         ]) for job in job_data
     ]
 

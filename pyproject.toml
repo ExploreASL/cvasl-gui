@@ -17,12 +17,13 @@ dash-bootstrap-components = "1.7.1"
 # TODO: these packages should be installed by cvasl:
 neuroharmonize = "^2.4.5"
 neurocombat = "^0.2.12"
-
-[tool.poetry.scripts]
-cvasl-gui = "cvasl_gui.index:main"
+numpy = "^1.26" # somehow cvasl requires <2
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
+
+[tool.poetry.scripts]
+cvasl-gui = "cvasl_gui.index:main"
 
 [build-system]
 requires = ["poetry-core"]

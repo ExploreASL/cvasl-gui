@@ -16,7 +16,6 @@ def create_directory_input():
             inputStyle={'marginRight': '5px'},
             inline=True
         )]),
-        html.Div(id='file-contents-container'),
         html.Div(id='harmonized-file-list-container', children=[dcc.Checklist(
             id='harmonized-file-list',
             options=[],  # populated via callback
@@ -24,7 +23,7 @@ def create_directory_input():
             inputStyle={'marginRight': '5px'},
             inline=True
         )]),
-        html.Div(id='harmonized-file-contents-container'),
+        html.Div(id='file-contents-container'),
     ], style={'display': 'flex', 'flex-direction': 'column', 'gap': '10px'})
 
 
@@ -92,65 +91,57 @@ def populate_harmonized_file_list(_):
 
 
 @app.callback(
-    Output('harmonized-file-contents-container', 'children'),
-    Input('harmonized-file-list', 'value')  # triggered on checklist change
-)
-def load_selected_harmonized_files(selected_files):
-    if not selected_files:
-        raise PreventUpdate
-
-    dfs = []
-    errors = []
-    for fname in selected_files:
-        split = fname.split(os.sep)
-        file_path = os.path.join(JOBS_DIR, split[0], 'output', split[1])
-        try:
-            df = pd.read_csv(file_path)
-            dfs.append(df)
-        except Exception as e:
-            errors.append(f"Error loading {fname}: {e}")
-
-    if dfs:
-        data_store.harmonized_data = pd.concat(dfs, ignore_index=True)
-    else:
-        data_store.harmonized_data = pd.DataFrame()  # empty fallback
-
-    return html.Div([
-        html.Div(f"Loaded files: {', '.join(selected_files)}"),
-        html.Div(f"{len(data_store.harmonized_data)} rows loaded"),
-        *([html.Div(e, style={'color': 'red'}) for e in errors] if errors else [])
-    ])
-
-
-
-@app.callback(
     Output('file-contents-container', 'children'),
-    Input('file-list', 'value')  # triggered on checklist change
+    Input('file-list', 'value'),
+    Input('harmonized-file-list', 'value')
 )
-def load_selected_files(selected_files):
-    if not selected_files:
+def load_all_selected_files(normal_files, harmonized_files):
+    if not normal_files and not harmonized_files:
         raise PreventUpdate
 
-    dfs = []
-    input_files = []
+    normal_dfs = []
+    harmonized_dfs = []
+    normal_file_rows = []
+    harmonized_file_rows = []
     errors = []
-    for fname in selected_files:
-        file_path = os.path.join(FIXED_DIR, fname)
-        input_files.append(file_path)
-        try:
-            df = pd.read_csv(file_path)
-            dfs.append(df)
-        except Exception as e:
-            errors.append(f"Error loading {fname}: {e}")
 
-    data_store.input_files = input_files
-    if dfs:
-        data_store.all_data = pd.concat(dfs, ignore_index=True)
-    else:
-        data_store.all_data = pd.DataFrame()  # empty fallback
+    # Load normal files
+    input_files = []
+    if normal_files:
+        for fname in normal_files:
+            file_path = os.path.join(FIXED_DIR, fname)
+            input_files.append(file_path)
+            try:
+                df = pd.read_csv(file_path)
+                df['harmonized'] = False
+                normal_dfs.append(df)
+                normal_file_rows.append(f"{fname} ({len(df)})")
+            except Exception as e:
+                errors.append(f"Error loading {fname}: {e}")
+        data_store.input_files = input_files
+        data_store.input_data = pd.concat(normal_dfs, ignore_index=True) if normal_dfs else pd.DataFrame()
+
+    # Load harmonized files
+    if harmonized_files:
+        for fname in harmonized_files:
+            split = fname.split(os.sep)
+            file_path = os.path.join(JOBS_DIR, split[0], 'output', split[1])
+            try:
+                df = pd.read_csv(file_path)
+                df['harmonized'] = True
+                harmonized_dfs.append(df)
+                harmonized_file_rows.append(f"{fname} ({len(df)})")
+            except Exception as e:
+                errors.append(f"Error loading {fname}: {e}")
+        data_store.harmonized_data = pd.concat(harmonized_dfs, ignore_index=True) if harmonized_dfs else pd.DataFrame()
+
+    # Combine all
+    combined_dfs = normal_dfs + harmonized_dfs
+    data_store.all_data = pd.concat(combined_dfs, ignore_index=True) if combined_dfs else pd.DataFrame()
 
     return html.Div([
-        html.Div(f"Loaded files: {', '.join(selected_files)}"),
-        html.Div(f"{len(data_store.all_data)} rows loaded"),
+        html.Div(f"Loaded normal files: {', '.join(normal_file_rows) if normal_file_rows else 'None'}"),
+        html.Div(f"Loaded harmonized files: {', '.join(harmonized_file_rows) if harmonized_file_rows else 'None'}"),
+        html.Div(f"{len(data_store.all_data)} total rows loaded"),
         *([html.Div(e, style={'color': 'red'}) for e in errors] if errors else [])
     ])

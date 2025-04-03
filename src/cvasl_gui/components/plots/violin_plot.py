@@ -20,7 +20,8 @@ layout = html.Div([
 
     html.Div([
         dcc.Graph(id='violin-plot')
-    ], style={'flex': '2', 'padding': '10px'})
+    ], style={'flex': '2', 'padding': '10px'}),
+
 ], style={'display': 'flex', 'width': '100%'})
 
 
@@ -51,6 +52,6 @@ def update_violin_plot(y_axis, group_by):
     if not y_axis:
         return {}
     data = data_store.all_data
-    fig = px.violin(data, y=y_axis, color=group_by,
+    fig = px.violin(data, y=y_axis, color=group_by, facet_col='harmonized',
                     box=True, points='outliers') # points can be 'all', 'outliers', or False
     return fig

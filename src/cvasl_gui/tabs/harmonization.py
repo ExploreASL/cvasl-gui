@@ -184,6 +184,7 @@ def start_job(n_clicks, selected_features, discrete_covariate_features, continuo
 
     job_arguments = {
         "input_paths": data_store.input_files,
+        "input_sites": data_store.input_sites,
         "harmonization_features": selected_features,
         "discrete_covariate_features": discrete_covariate_features,
         "continuous_covariate_features": continuous_covariate_features,

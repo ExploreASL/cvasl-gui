@@ -107,18 +107,26 @@ def load_all_selected_files(normal_files, harmonized_files):
 
     # Load normal files
     input_files = []
+    input_sites = []
     if normal_files:
         for fname in normal_files:
             file_path = os.path.join(FIXED_DIR, fname)
             input_files.append(file_path)
             try:
                 df = pd.read_csv(file_path)
+                # Get the site from the dataframe
+                site_col = [col for col in df.columns if col.lower() == 'site']
+                if site_col:
+                    input_sites.append(int(df[site_col[0]].iloc[0]))
+                else:
+                    input_sites.append(0) #TODO: how to make sure this is sensible?
                 df['harmonized'] = False
                 normal_dfs.append(df)
                 normal_file_rows.append(f"{fname} ({len(df)})")
             except Exception as e:
                 errors.append(f"Error loading {fname}: {e}")
         data_store.input_files = input_files
+        data_store.input_sites = input_sites
         data_store.input_data = pd.concat(normal_dfs, ignore_index=True) if normal_dfs else pd.DataFrame()
 
     # Load harmonized files

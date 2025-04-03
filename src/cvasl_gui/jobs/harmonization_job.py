@@ -43,6 +43,7 @@ def run_harmonization() -> None:
         job_arguments = json.load(f)
 
     input_paths = job_arguments["input_paths"]
+    input_names = [ os.path.splitext(os.path.basename(path))[0] for path in input_paths ]
     harmonization_features = job_arguments["harmonization_features"]
     covariate_features = job_arguments["covariate_features"]
     site_indicator = job_arguments["site_indicator"]
@@ -62,7 +63,7 @@ def run_harmonization() -> None:
         output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
         os.makedirs(output_folder, exist_ok=True)
         df = mri_dataset.data
-        df.to_csv(os.path.join(output_folder, f"output_{i}.csv"))
+        df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"))
     # output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
     # df_out.to_csv("output.csv")
 

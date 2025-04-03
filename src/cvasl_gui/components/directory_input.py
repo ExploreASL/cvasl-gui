@@ -1,3 +1,4 @@
+import json
 import os
 from dash import dcc, html, Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -15,11 +16,20 @@ def create_directory_input():
             inputStyle={'marginRight': '5px'},
             inline=True
         )]),
-        html.Div(id='file-contents-container')
+        html.Div(id='file-contents-container'),
+        html.Div(id='harmonized-file-list-container', children=[dcc.Checklist(
+            id='harmonized-file-list',
+            options=[],  # populated via callback
+            labelStyle={'display': 'block'},
+            inputStyle={'marginRight': '5px'},
+            inline=True
+        )]),
+        html.Div(id='harmonized-file-contents-container'),
     ], style={'display': 'flex', 'flex-direction': 'column', 'gap': '10px'})
 
 
-FIXED_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data'))  # adjust as needed
+FIXED_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data'))
+JOBS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'jobs'))
 
 @app.callback(
     Output('file-list', 'options'),
@@ -34,6 +44,82 @@ def populate_file_list(_):
         if os.path.isfile(os.path.join(FIXED_DIR, f)) and f.endswith('.csv')
     ])
     return [{'label': f, 'value': f} for f in files]
+
+
+@app.callback(
+    Output('harmonized-file-list', 'options'),
+    Input('harmonized-file-list', 'id')  # dummy trigger on page load
+)
+def populate_harmonized_file_list(_):
+    if not os.path.isdir(JOBS_DIR):
+        return [{'label': 'Directory not found', 'value': '', 'disabled': True}]
+    
+    job_dirs = sorted(os.listdir(JOBS_DIR), reverse=True)
+    all_files = []
+    for job_dir in job_dirs:
+        job_details_file = os.path.join(JOBS_DIR, job_dir, "job_details.json")
+        job_arguments_file = os.path.join(JOBS_DIR, job_dir, "job_arguments.json")
+        output_dir = os.path.join(JOBS_DIR, job_dir, 'output')
+        if os.path.exists(output_dir):
+            output_files = [ os.path.join(job_dir, f) for f in os.listdir(output_dir)
+                            if os.path.isfile(os.path.join(output_dir, f)) and f.endswith('.csv') ]
+            all_files.extend(output_files)
+
+    return [{'label': f, 'value': f} for f in all_files]
+    
+        # if os.path.exists(job_details_file):
+        #     # Load the job details
+        #     with open(job_details_file) as f:
+        #         details = json.load(f)
+
+        #     # Load current status
+        #     status_file = os.path.join(JOBS_DIR, job_dir, "job_status")
+        #     if os.path.exists(status_file):
+        #         with open(status_file) as f:
+        #             details["status"] = f.read()
+
+        #     # Check if process is still running
+        #     process_id = details.get("process")
+        #     details["running"] = is_process_running(process_id)
+
+        #     # Load job arguments
+        #     if os.path.exists(job_arguments_file):
+        #         with open(job_arguments_file) as f:
+        #             job_arguments = json.load(f)
+        #             details["arguments"] = job_arguments
+
+        #     job_data.append(details)
+
+
+@app.callback(
+    Output('harmonized-file-contents-container', 'children'),
+    Input('harmonized-file-list', 'value')  # triggered on checklist change
+)
+def load_selected_harmonized_files(selected_files):
+    if not selected_files:
+        raise PreventUpdate
+
+    dfs = []
+    errors = []
+    for fname in selected_files:
+        split = fname.split(os.sep)
+        file_path = os.path.join(JOBS_DIR, split[0], 'output', split[1])
+        try:
+            df = pd.read_csv(file_path)
+            dfs.append(df)
+        except Exception as e:
+            errors.append(f"Error loading {fname}: {e}")
+
+    if dfs:
+        data_store.harmonized_data = pd.concat(dfs, ignore_index=True)
+    else:
+        data_store.harmonized_data = pd.DataFrame()  # empty fallback
+
+    return html.Div([
+        html.Div(f"Loaded files: {', '.join(selected_files)}"),
+        html.Div(f"{len(data_store.harmonized_data)} rows loaded"),
+        *([html.Div(e, style={'color': 'red'}) for e in errors] if errors else [])
+    ])
 
 
 

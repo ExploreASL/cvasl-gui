@@ -5,8 +5,8 @@ import zipfile
 import time
 import json
 
-from cvasl.harmonizers import NeuroHarmonize
-from cvasl.dataset import MRIdataset
+from cvasl.harmonizers import NeuroCombat
+from cvasl.dataset import MRIdataset, encode_cat_features
 
 
 # Argument is the job id (input and parameters(?) are inside the job folder)
@@ -45,18 +45,22 @@ def run_harmonization() -> None:
     input_paths = job_arguments["input_paths"]
     input_names = [ os.path.splitext(os.path.basename(path))[0] for path in input_paths ]
     harmonization_features = job_arguments["harmonization_features"]
-    covariate_features = job_arguments["covariate_features"]
+    discrete_covariate_features = job_arguments["discrete_covariate_features"]
+    continuous_covariate_features = job_arguments["continuous_covariate_features"]
     site_indicator = job_arguments["site_indicator"]
 
     print("Running harmonization")
     print("Input paths:", input_paths)
     print("Harmonization features:", harmonization_features)
-    print("Covariate features:", covariate_features)
 
     # Perform harmonization
-    mri_datasets = [MRIdataset(input_path, "1", "participant_id") for input_path in input_paths]
-    harmonizer = NeuroHarmonize(harmonization_features, covariate_features, [], "Site", True)
+    mri_datasets = [MRIdataset(input_path, index, "participant_id", features_to_drop=['index2']) for index, input_path in enumerate(input_paths) ]
+    [mri_dataset.preprocess() for mri_dataset in mri_datasets]
+    features_to_map = ['sex']
+    encode_cat_features(mri_datasets, features_to_map)
+    harmonizer = NeuroCombat(harmonization_features, discrete_covariate_features, continuous_covariate_features, site_indicator=site_indicator)
     output = harmonizer.harmonize(mri_datasets)
+    [dataset.prepare_for_export() for dataset in output]
 
     # Write output
     for i, mri_dataset in enumerate(output):

@@ -72,7 +72,7 @@ def run_harmonization() -> None:
         output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
         os.makedirs(output_folder, exist_ok=True)
         df = mri_dataset.data
-        df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"))
+        df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"), index=False)
     # output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
     # df_out.to_csv("output.csv")
 

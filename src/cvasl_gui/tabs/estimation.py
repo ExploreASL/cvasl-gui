@@ -10,8 +10,9 @@ from cvasl_gui import data_store
 
 
 # Folder where job output files are stored
-OUTPUT_FOLDER = "jobs"
-FEATURES_FILE = os.path.join(OUTPUT_FOLDER, "selected_features.json")
+WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
+INPUT_DIR = os.path.join(WORKING_DIR, 'data')
+JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
 
 def get_dataframe_columns():

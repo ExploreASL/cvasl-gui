@@ -27,20 +27,21 @@ def create_directory_input():
     ], style={'display': 'flex', 'flex-direction': 'column', 'gap': '10px'})
 
 
-FIXED_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data'))
-JOBS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'jobs'))
+WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
+INPUT_DIR = os.path.join(WORKING_DIR, 'data')
+JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
 @app.callback(
     Output('file-list', 'options'),
     Input('file-list', 'id')  # dummy trigger on page load
 )
 def populate_file_list(_):
-    if not os.path.isdir(FIXED_DIR):
+    if not os.path.isdir(INPUT_DIR):
         return [{'label': 'Directory not found', 'value': '', 'disabled': True}]
     
     files = sorted([
-        f for f in os.listdir(FIXED_DIR)
-        if os.path.isfile(os.path.join(FIXED_DIR, f)) and f.endswith('.csv')
+        f for f in os.listdir(INPUT_DIR)
+        if os.path.isfile(os.path.join(INPUT_DIR, f)) and f.endswith('.csv')
     ])
     return [{'label': f, 'value': f} for f in files]
 
@@ -110,7 +111,7 @@ def load_all_selected_files(normal_files, harmonized_files):
     input_sites = []
     if normal_files:
         for fname in normal_files:
-            file_path = os.path.join(FIXED_DIR, fname)
+            file_path = os.path.join(INPUT_DIR, fname)
             input_files.append(file_path)
             try:
                 df = pd.read_csv(file_path)

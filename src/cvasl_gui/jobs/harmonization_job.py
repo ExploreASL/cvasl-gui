@@ -11,20 +11,23 @@ from cvasl.dataset import MRIdataset, encode_cat_features
 
 # Argument is the job id (input and parameters(?) are inside the job folder)
 
-JOBS_FOLDER = "jobs"
+WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
+INPUT_DIR = os.path.join(WORKING_DIR, 'data')
+JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
+
 
 def write_job_status(job_id: str, status: str) -> None:
     """ Write the status of the job to a file (for use in the GUI)
     """
-    status_path = os.path.join(JOBS_FOLDER, job_id, "job_status")
+    status_path = os.path.join(JOBS_DIR, job_id, "job_status")
     with open(status_path, "w") as f:
         f.write(status)
 
 
 def zip_job_output(job_id):
     """Create a ZIP file for job output if not already zipped"""
-    output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
-    zip_path = os.path.join(JOBS_FOLDER, job_id, 'output.zip')
+    output_folder = os.path.join(JOBS_DIR, job_id, 'output')
+    zip_path = os.path.join(JOBS_DIR, job_id, 'output.zip')
 
     if not os.path.exists(zip_path):
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
@@ -38,7 +41,7 @@ def run_harmonization() -> None:
     """Run the harmonization process"""
 
     # Load job arguments
-    job_arguments_path = os.path.join(JOBS_FOLDER, job_id, "job_arguments.json")
+    job_arguments_path = os.path.join(JOBS_DIR, job_id, "job_arguments.json")
     with open(job_arguments_path) as f:
         job_arguments = json.load(f)
 
@@ -55,7 +58,7 @@ def run_harmonization() -> None:
     print("Harmonization features:", harmonization_features)
 
     # Perform harmonization
-    mri_datasets = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=['index2'])
+    mri_datasets = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=[])
                     for input_site, input_path in zip(input_sites, input_paths) ]
     for mri_dataset in mri_datasets:
         mri_dataset.preprocess()
@@ -69,11 +72,11 @@ def run_harmonization() -> None:
 
     # Write output
     for i, mri_dataset in enumerate(output):
-        output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
+        output_folder = os.path.join(JOBS_DIR, job_id, 'output')
         os.makedirs(output_folder, exist_ok=True)
         df = mri_dataset.data
         df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"), index=False)
-    # output_folder = os.path.join(JOBS_FOLDER, job_id, 'output')
+    # output_folder = os.path.join(JOBS_DIR, job_id, 'output')
     # df_out.to_csv("output.csv")
 
 
@@ -87,7 +90,7 @@ def process(job_id: str) -> None:
         # time.sleep(30)
 
         # # Write some dummy output
-        # output_path = os.path.join(JOBS_FOLDER, job_id, "output", "output.txt")
+        # output_path = os.path.join(JOBS_DIR, job_id, "output", "output.txt")
         # os.makedirs(os.path.dirname(output_path), exist_ok=True)
         # with open(output_path, "w") as f:
         #     f.write(f"This is the output of job {job_id}")
@@ -97,7 +100,7 @@ def process(job_id: str) -> None:
 
     except Exception as e:
         write_job_status(job_id, "failed")
-        with open(os.path.join(JOBS_FOLDER, job_id, "error.log"), "w") as f:
+        with open(os.path.join(JOBS_DIR, job_id, "error.log"), "w") as f:
             f.write(traceback.format_exc())
         return
     

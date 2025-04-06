@@ -1,7 +1,6 @@
 import os
 import webbrowser
 from threading import Timer
-from dotenv import load_dotenv
 from waitress import serve
 
 from dash import html, dcc, Input, Output
@@ -50,10 +49,9 @@ def display_content(selected_tab):
 
 
 def main():
-    # Load environment variables
-    load_dotenv()
     port = int(os.getenv('CVASL_PORT', 8767))
     debug_mode = os.getenv('CVASL_DEBUG_MODE', 'False') == 'True'
+    path = os.getenv('CVASL_PATHNAME_PREFIX', '/')
     host = '127.0.0.1'
 
     app.index_string = """
@@ -80,8 +78,8 @@ def main():
         app.run_server(port=port, debug=True)
     else:
         # Schedule a timer to open the browser
-        url = f"http://{host}:{port}/"
-        Timer(1, lambda: webbrowser.open(url)).start()
+        url = f"http://{host}:{port}{path}"
+        #Timer(1, lambda: webbrowser.open(url)).start()
         
         # Start the server using waitress
         print(f"Starting server at {url}")

@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output, State, ctx, MATCH, ALL
 import os
+import sys
 import time
 import subprocess
 import json
@@ -10,7 +11,10 @@ from cvasl_gui.app import app
 
 
 # Folder where job output files are stored
-OUTPUT_FOLDER = "jobs"
+WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
+INPUT_DIR = os.path.join(WORKING_DIR, 'data')
+JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
+
 
 
 def create_job_list():
@@ -30,7 +34,7 @@ def run_job(job_arguments: dict):
 
     # Create a unique folder for the job
     job_id = str(int(time.time()))
-    job_folder = os.path.join(OUTPUT_FOLDER, job_id)
+    job_folder = os.path.join(JOBS_DIR, job_id)
     os.makedirs(job_folder, exist_ok=True)
 
     # Save job arguments
@@ -45,7 +49,7 @@ def run_job(job_arguments: dict):
     # Start the job
     print("Starting job", job_id)
     script_path = os.path.join(os.path.dirname(__file__), "..", "jobs", "harmonization_job.py")
-    process = subprocess.Popen(["python", script_path, job_id])
+    process = subprocess.Popen([sys.executable, script_path, job_id])
 
     # Save job details (so it can be monitored)
     job_details = {
@@ -61,18 +65,18 @@ def run_job(job_arguments: dict):
 def check_job_status():
     """Check if jobs are still running and return their details"""
     job_data = []
-    job_dirs = sorted(os.listdir(OUTPUT_FOLDER), reverse=True)
+    job_dirs = sorted(os.listdir(JOBS_DIR), reverse=True)
 
     for job_dir in job_dirs:
-        job_details_file = os.path.join(OUTPUT_FOLDER, job_dir, "job_details.json")
-        job_arguments_file = os.path.join(OUTPUT_FOLDER, job_dir, "job_arguments.json")
+        job_details_file = os.path.join(JOBS_DIR, job_dir, "job_details.json")
+        job_arguments_file = os.path.join(JOBS_DIR, job_dir, "job_arguments.json")
         if os.path.exists(job_details_file):
             # Load the job details
             with open(job_details_file) as f:
                 details = json.load(f)
 
             # Load current status
-            status_file = os.path.join(OUTPUT_FOLDER, job_dir, "job_status")
+            status_file = os.path.join(JOBS_DIR, job_dir, "job_status")
             if os.path.exists(status_file):
                 with open(status_file) as f:
                     details["status"] = f.read()
@@ -93,7 +97,7 @@ def check_job_status():
 
 def cancel_job(job_id):
     """Terminate a running job"""
-    job_details_file = os.path.join(OUTPUT_FOLDER, job_id, "job_details.json")
+    job_details_file = os.path.join(JOBS_DIR, job_id, "job_details.json")
     if os.path.exists(job_details_file):
         with open(job_details_file) as f:
             details = json.load(f)
@@ -107,7 +111,7 @@ def cancel_job(job_id):
 
 def remove_job(job_id):
     """Delete job folder"""
-    job_folder = os.path.join(OUTPUT_FOLDER, job_id)
+    job_folder = os.path.join(JOBS_DIR, job_id)
     if os.path.exists(job_folder):
         for root, dirs, files in os.walk(job_folder, topdown=False):
             for file in files:
@@ -201,7 +205,7 @@ def func(n_clicks, ids):
         job_id = triggered_id["index"]
         index = [id["index"] for id in ids].index(job_id)
         if n_clicks[index] > 0:
-            path = os.path.join(OUTPUT_FOLDER, job_id, "output.zip")
+            path = os.path.join(JOBS_DIR, job_id, "output.zip")
             return dcc.send_file(path)
 
     return dash.no_update  # Avoid unwanted triggers

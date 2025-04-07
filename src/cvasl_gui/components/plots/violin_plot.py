@@ -30,7 +30,7 @@ layout = html.Div([
     Output('violin-y-axis', 'value'),
     Output('violin-group-by', 'options'),
     Output('violin-group-by', 'value'),
-    Input('data-table', 'data')
+    Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_violin_dropdowns(data):
     df = data_store.all_data

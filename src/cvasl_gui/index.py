@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 from cvasl_gui import data_store
 from cvasl_gui.app import app
 from cvasl_gui.tabs.harmonization import create_tab_harmonization
-from cvasl_gui.tabs.estimation import create_tab_estimation
+from cvasl_gui.tabs.prediction import create_tab_prediction
 
 data_store.all_data = None
 data_store.selected_directory = None
@@ -23,7 +23,7 @@ app.layout = html.Div(
             value='1',
             children=[
                 dcc.Tab(label='Harmonize', value='1'),
-                dcc.Tab(label='Estimate', value='2'),
+                dcc.Tab(label='Predict', value='2'),
             ],
             vertical=False
         ),
@@ -31,7 +31,7 @@ app.layout = html.Div(
         html.Div(
             [
                 html.Div(create_tab_harmonization(), id='tab-1-content', style={'display': 'none'}),
-                html.Div(create_tab_estimation(), id='tab-2-content', style={'display': 'none'}),
+                html.Div(create_tab_prediction(), id='tab-2-content', style={'display': 'none'}),
             ],
             id='tab-content-container'
         )

@@ -29,7 +29,7 @@ layout = html.Div([
     Output('box-y-axis', 'value'),
     Output('box-group-by', 'options'),
     Output('box-group-by', 'value'),
-    Input('data-table', 'data')
+    Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_box_dropdowns(data):
     df = data_store.all_data
@@ -50,5 +50,5 @@ def update_box_plot(y_axis, group_by):
     if not y_axis:
         return {}
     data = data_store.all_data
-    fig = px.box(data, y=y_axis, color=group_by, facet_col='harmonized')
+    fig = px.box(data, y=y_axis, color=group_by)
     return fig

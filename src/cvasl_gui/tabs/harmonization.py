@@ -102,9 +102,9 @@ def create_harmonization_parameters():
 def create_tab_harmonization():
     return html.Div([
         dbc.Accordion([
-            dbc.AccordionItem([create_directory_input()],
+            dbc.AccordionItem([create_directory_input('harmonization')],
                 title="Select new input data"),
-            dbc.AccordionItem([create_data_table()],
+            dbc.AccordionItem([create_data_table('harmonization')],
                 title="Inspect data"),
             dbc.AccordionItem([create_feature_compare()],
                 title="Feature comparison"),
@@ -119,7 +119,7 @@ def create_tab_harmonization():
 # Populate dropdown with columns from the data table
 @app.callback(
     Output("feature-dropdown", "options"),
-    Input("data-table", "data"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
 def update_feature_dropdown(data):
@@ -130,7 +130,7 @@ def update_feature_dropdown(data):
 @app.callback(
     Output("discrete-covariate-dropdown", "options"),
     Output("discrete-covariate-dropdown", "value"),
-    Input("data-table", "data"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
 def update_discrete_covariate_dropdown(data):
@@ -145,7 +145,7 @@ def update_discrete_covariate_dropdown(data):
 @app.callback(
     Output("continuous-covariate-dropdown", "options"),
     Output("continuous-covariate-dropdown", "value"),
-    Input("data-table", "data"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
 def update_continuous_covariate_dropdown(data):
@@ -160,7 +160,7 @@ def update_continuous_covariate_dropdown(data):
 @app.callback(
     Output("site-indicator-dropdown", "options"),
     Output("site-indicator-dropdown", "value"),
-    Input("data-table", "data"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
 def update_site_indicator_dropdown(data):

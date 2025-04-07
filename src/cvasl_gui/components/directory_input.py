@@ -1,29 +1,33 @@
 import json
 import os
-from dash import dcc, html, Input, Output, State
+from dash import dcc, html, Input, Output, State, MATCH
 from dash.exceptions import PreventUpdate
 import pandas as pd
 from cvasl_gui.app import app
 from cvasl_gui import data_store
 
 
-def create_directory_input():
+def create_directory_input(instance_id):
     return html.Div([
-        html.Div(id='file-list-container', children=[dcc.Checklist(
-            id='file-list',
-            options=[],  # populated via callback
-            labelStyle={'display': 'block'},
-            inputStyle={'marginRight': '5px'},
-            inline=True
-        )]),
-        html.Div(id='harmonized-file-list-container', children=[dcc.Checklist(
-            id='harmonized-file-list',
-            options=[],  # populated via callback
-            labelStyle={'display': 'block'},
-            inputStyle={'marginRight': '5px'},
-            inline=True
-        )]),
-        html.Div(id='file-contents-container'),
+        html.Div(id={'type': 'file-list-container', 'index': instance_id}, children=[
+            dcc.Checklist(
+                id={'type': 'file-list', 'index': instance_id},
+                options=[],
+                labelStyle={'display': 'block'},
+                inputStyle={'marginRight': '5px'},
+                inline=True
+            )
+        ]),
+        html.Div(id={'type': 'harmonized-file-list-container', 'index': instance_id}, children=[
+            dcc.Checklist(
+                id={'type': 'harmonized-file-list', 'index': instance_id},
+                options=[],
+                labelStyle={'display': 'block'},
+                inputStyle={'marginRight': '5px'},
+                inline=True
+            )
+        ]),
+        html.Div(id={'type': 'file-contents-container', 'index': instance_id}),
     ], style={'display': 'flex', 'flex-direction': 'column', 'gap': '10px'})
 
 
@@ -32,28 +36,25 @@ INPUT_DIR = os.path.join(WORKING_DIR, 'data')
 JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
 @app.callback(
-    Output('file-list', 'options'),
-    Input('file-list', 'id')  # dummy trigger on page load
+    Output({'type': 'file-list', 'index': MATCH}, 'options'),
+    Input({'type': 'file-list', 'index': MATCH}, 'id')  # dummy
 )
 def populate_file_list(_):
     if not os.path.isdir(INPUT_DIR):
         return [{'label': 'Directory not found', 'value': '', 'disabled': True}]
-    
     files = sorted([
         f for f in os.listdir(INPUT_DIR)
         if os.path.isfile(os.path.join(INPUT_DIR, f)) and f.endswith('.csv')
     ])
     return [{'label': f, 'value': f} for f in files]
 
-
 @app.callback(
-    Output('harmonized-file-list', 'options'),
-    Input('harmonized-file-list', 'id')  # dummy trigger on page load
+    Output({'type': 'harmonized-file-list', 'index': MATCH}, 'options'),
+    Input({'type': 'harmonized-file-list', 'index': MATCH}, 'id')  # dummy
 )
 def populate_harmonized_file_list(_):
     if not os.path.isdir(JOBS_DIR):
         return [{'label': 'Directory not found', 'value': '', 'disabled': True}]
-    
     job_dirs = sorted(os.listdir(JOBS_DIR), reverse=True)
     all_files = []
     for job_dir in job_dirs:
@@ -92,9 +93,9 @@ def populate_harmonized_file_list(_):
 
 
 @app.callback(
-    Output('file-contents-container', 'children'),
-    Input('file-list', 'value'),
-    Input('harmonized-file-list', 'value')
+    Output({'type': 'file-contents-container', 'index': MATCH}, 'children'),
+    Input({'type': 'file-list', 'index': MATCH}, 'value'),
+    Input({'type': 'harmonized-file-list', 'index': MATCH}, 'value')
 )
 def load_all_selected_files(normal_files, harmonized_files):
     if not normal_files and not harmonized_files:

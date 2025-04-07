@@ -36,7 +36,7 @@ layout = html.Div([
     Output('scatter-y-axis', 'value'),
     Output('scatter-group-by', 'options'),
     Output('scatter-group-by', 'value'),
-    Input('data-table', 'data')
+    Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_scatter_dropdowns(data):
     df = data_store.all_data

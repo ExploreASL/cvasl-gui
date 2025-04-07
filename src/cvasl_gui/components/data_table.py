@@ -1,13 +1,13 @@
 import pandas as pd
-from dash import Input, Output, dash_table
+from dash import Input, Output, dash_table, MATCH
 from dash.exceptions import PreventUpdate
 from cvasl_gui.app import app
 from cvasl_gui import data_store
 
 
-def create_data_table():
+def create_data_table(instance_id):
     return dash_table.DataTable(
-        id='data-table',
+        id={'type': 'data-table', 'index': instance_id},
         columns=[
             {'name': 'participant_id', 'id': 'participant_id', 'type': 'text'},
             {'name': 'ID', 'id': 'ID', 'type': 'text'},
@@ -19,14 +19,14 @@ def create_data_table():
         filter_action='native',
         sort_action='native',
         sort_mode='multi',
-        page_action='native',  # Enable pagination
+        page_action='native',
         page_size=20
     )
 
 @app.callback(
-    Output('data-table', 'data'),
-    Output('data-table', 'columns'),
-    Input('file-contents-container', 'children')
+    Output({'type': 'data-table', 'index': MATCH}, 'data'),
+    Output({'type': 'data-table', 'index': MATCH}, 'columns'),
+    Input({'type': 'file-contents-container', 'index': MATCH}, 'children')
 )
 def update_table(data):
     if data is None:

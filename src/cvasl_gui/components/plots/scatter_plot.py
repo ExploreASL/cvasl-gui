@@ -39,7 +39,7 @@ layout = html.Div([
     Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_scatter_dropdowns(data):
-    df = data_store.all_data
+    df = data_store.all_data['harmonization']
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None, [], None
 
@@ -59,6 +59,6 @@ def update_scatter_dropdowns(data):
 def update_scatter_plot(x_axis, y_axis, group_by):
     if not x_axis or not y_axis:
         return {}
-    data = data_store.all_data
+    data = data_store.all_data['harmonization']
     fig = px.scatter(data, x=x_axis, y=y_axis, color=group_by, facet_col='harmonized', trendline='ols')
     return fig

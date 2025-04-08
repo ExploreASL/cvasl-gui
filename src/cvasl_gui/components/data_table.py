@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import Input, Output, dash_table, MATCH
+from dash import Input, Output, dash_table, MATCH, ctx
 from dash.exceptions import PreventUpdate
 from cvasl_gui.app import app
 from cvasl_gui import data_store
@@ -32,6 +32,7 @@ def update_table(data):
     if data is None:
         raise PreventUpdate
 
-    df = data_store.all_data
+    ctx_index = ctx.triggered_id['index']
+    df = data_store.all_data[ctx_index]
     columns = [{'name': col, 'id': col} for col in df.columns]
     return df.to_dict('records'), columns

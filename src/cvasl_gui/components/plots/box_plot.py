@@ -1,4 +1,4 @@
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, ctx
 from cvasl_gui.app import app
 import plotly.express as px
 from cvasl_gui import data_store
@@ -32,7 +32,7 @@ layout = html.Div([
     Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_box_dropdowns(data):
-    df = data_store.all_data
+    df = data_store.all_data['harmonization']
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None
     columns = [{'label': col, 'value': col} for col in df.columns]
@@ -49,6 +49,6 @@ def update_box_dropdowns(data):
 def update_box_plot(y_axis, group_by):
     if not y_axis:
         return {}
-    data = data_store.all_data
+    data = data_store.all_data['harmonization']
     fig = px.box(data, y=y_axis, color=group_by)
     return fig

@@ -76,8 +76,6 @@ def run_harmonization() -> None:
         os.makedirs(output_folder, exist_ok=True)
         df = mri_dataset.data
         df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"), index=False)
-    # output_folder = os.path.join(JOBS_DIR, job_id, 'output')
-    # df_out.to_csv("output.csv")
 
 
 def process(job_id: str) -> None:
@@ -86,14 +84,6 @@ def process(job_id: str) -> None:
 
     try:
         run_harmonization()
-        # # Sleep (dummy)
-        # time.sleep(30)
-
-        # # Write some dummy output
-        # output_path = os.path.join(JOBS_DIR, job_id, "output", "output.txt")
-        # os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        # with open(output_path, "w") as f:
-        #     f.write(f"This is the output of job {job_id}")
 
         # Zip the output
         zip_job_output(job_id)

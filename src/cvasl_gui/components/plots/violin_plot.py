@@ -33,7 +33,7 @@ layout = html.Div([
     Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
 )
 def update_violin_dropdowns(data):
-    df = data_store.all_data
+    df = data_store.all_data['harmonization']
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None
 
@@ -51,7 +51,7 @@ def update_violin_dropdowns(data):
 def update_violin_plot(y_axis, group_by):
     if not y_axis:
         return {}
-    data = data_store.all_data
+    data = data_store.all_data['harmonization']
     fig = px.violin(data, y=y_axis, color=group_by, facet_col='harmonized',
                     box=True, points='outliers') # points can be 'all', 'outliers', or False
     return fig

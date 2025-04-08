@@ -20,7 +20,7 @@ JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
 
 def get_dataframe_columns():
-    df = data_store.all_data
+    df = data_store.all_data['harmonization']
     if df is None:
         return []
     return df.columns
@@ -181,11 +181,11 @@ def update_site_indicator_dropdown(data):
 )
 def start_job(n_clicks, selected_features, discrete_covariate_features, continuous_covariate_features, site_indicator):
     if not selected_features:
-        return dash.no_update
+        return
 
     job_arguments = {
-        "input_paths": data_store.input_files,
-        "input_sites": data_store.input_sites,
+        "input_paths": data_store.input_files['harmonization'],
+        "input_sites": data_store.input_sites['harmonization'],
         "harmonization_features": selected_features,
         "discrete_covariate_features": discrete_covariate_features,
         "continuous_covariate_features": continuous_covariate_features,
@@ -195,4 +195,4 @@ def start_job(n_clicks, selected_features, discrete_covariate_features, continuo
     # Start job in a separate thread
     threading.Thread(target=run_job, args=(job_arguments,), daemon=True).start()
 
-    return dash.no_update
+    return

@@ -12,7 +12,11 @@ from cvasl_gui.app import app
 from cvasl_gui.tabs.harmonization import create_tab_harmonization
 from cvasl_gui.tabs.prediction import create_tab_prediction
 
-data_store.all_data = None
+data_store.all_data = {
+  'harmonization': None,
+  'prediction-training': None,
+  'prediction-testing': None,
+}
 data_store.selected_directory = None
 
 app.layout = html.Div(

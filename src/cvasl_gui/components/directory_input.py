@@ -1,6 +1,6 @@
 import json
 import os
-from dash import dcc, html, Input, Output, State, MATCH
+from dash import dcc, html, Input, Output, State, MATCH, ctx
 from dash.exceptions import PreventUpdate
 import pandas as pd
 from cvasl_gui.app import app
@@ -100,6 +100,8 @@ def populate_harmonized_file_list(_):
 def load_all_selected_files(normal_files, harmonized_files):
     if not normal_files and not harmonized_files:
         raise PreventUpdate
+    
+    ctx_index = ctx.triggered_id['index']
 
     normal_dfs = []
     harmonized_dfs = []
@@ -127,9 +129,9 @@ def load_all_selected_files(normal_files, harmonized_files):
                 normal_file_rows.append(f"{fname} ({len(df)})")
             except Exception as e:
                 errors.append(f"Error loading {fname}: {e}")
-        data_store.input_files = input_files
-        data_store.input_sites = input_sites
-        data_store.input_data = pd.concat(normal_dfs, ignore_index=True) if normal_dfs else pd.DataFrame()
+        data_store.input_files[ctx_index] = input_files
+        data_store.input_sites[ctx_index] = input_sites
+        #data_store.input_data = pd.concat(normal_dfs, ignore_index=True) if normal_dfs else pd.DataFrame()
 
     # Load harmonized files
     if harmonized_files:
@@ -143,15 +145,14 @@ def load_all_selected_files(normal_files, harmonized_files):
                 harmonized_file_rows.append(f"{fname} ({len(df)})")
             except Exception as e:
                 errors.append(f"Error loading {fname}: {e}")
-        data_store.harmonized_data = pd.concat(harmonized_dfs, ignore_index=True) if harmonized_dfs else pd.DataFrame()
 
     # Combine all
     combined_dfs = normal_dfs + harmonized_dfs
-    data_store.all_data = pd.concat(combined_dfs, ignore_index=True) if combined_dfs else pd.DataFrame()
+    data_store.all_data[ctx_index] = pd.concat(combined_dfs, ignore_index=True) if combined_dfs else pd.DataFrame()
 
     return html.Div([
-        html.Div(f"Loaded normal files: {', '.join(normal_file_rows) if normal_file_rows else 'None'}"),
-        html.Div(f"Loaded harmonized files: {', '.join(harmonized_file_rows) if harmonized_file_rows else 'None'}"),
-        html.Div(f"{len(data_store.all_data)} total rows loaded"),
+        # html.Div(f"Loaded normal files: {', '.join(normal_file_rows) if normal_file_rows else 'None'}"),
+        # html.Div(f"Loaded harmonized files: {', '.join(harmonized_file_rows) if harmonized_file_rows else 'None'}"),
+        html.Div(f"{len(data_store.all_data[ctx_index])} total rows loaded"),
         *([html.Div(e, style={'color': 'red'}) for e in errors] if errors else [])
     ])

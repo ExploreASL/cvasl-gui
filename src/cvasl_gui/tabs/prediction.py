@@ -84,11 +84,19 @@ def create_prediction_parameters():
 # Populate dropdown with columns from the data table
 @app.callback(
     Output("prediction-features-dropdown", "options"),
-    Input({'type': 'data-table', 'index': 'prediction'}, "data"),
+    Output("prediction-features-dropdown", "value"),
+    Input({'type': 'data-table', 'index': 'prediction-training'}, "data"),
     prevent_initial_call=True
 )
 def update_feature_dropdown(data):
-    return [{"label": col, "value": col} for col in data[0].keys()]
+    if not data:
+        return [], []
+    options = [{"label": col, "value": col} for col in data[0].keys()]
+    look_for_values = ['aca_b_cbf', 'aca_b_cov', 'csf_vol', 'gm_icvratio', 'gm_vol', 'gmwm_icvratio',
+                       'mca_b_cbf', 'mca_b_cov','pca_b_cbf', 'pca_b_cov', 'totalgm_b_cbf','totalgm_b_cov',
+                       'wm_vol', 'wmh_count', 'wmhvol_wmvol']
+    default_values = [col for col in data[0].keys() if col.lower() in look_for_values]
+    return options, default_values
 
 
 @app.callback(
@@ -101,12 +109,14 @@ def start_job(n_clicks, selected_features):
         return
 
     job_arguments = {
-        "input_paths": data_store.input_files,
-        "input_sites": data_store.input_sites,
+        "train_paths": data_store.input_files['prediction-training'],
+        "train_sites": data_store.input_sites['prediction-training'],
+        "validation_paths": data_store.input_files['prediction-testing'],
+        "validation_sites": data_store.input_sites['prediction-testing'],
         "prediction_features": selected_features,
     }
 
     # Start job in a separate thread
-    threading.Thread(target=run_job, args=(job_arguments,), daemon=True).start()
+    threading.Thread(target=run_job, args=(job_arguments,False), daemon=True).start()
 
     return

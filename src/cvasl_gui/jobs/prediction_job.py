@@ -53,8 +53,12 @@ def run_prediction() -> None:
     validation_paths = job_arguments["validation_paths"]
     validation_names = [ os.path.splitext(os.path.basename(path))[0] for path in validation_paths ]
     validation_sites = job_arguments["validation_sites"]
+    model = job_arguments["model"] # TODO: actually use it
     prediction_features = job_arguments["prediction_features"]
     prediction_features = list(map(lambda x: x.lower(), prediction_features))
+    label = job_arguments["label"]
+    if label is None or label == "":
+        label = "predicted"
 
     # Load the training datasets into pandas dataframes and concatenate them
     train_dfs = [pd.read_csv(path) for path in train_paths]
@@ -99,9 +103,13 @@ def run_prediction() -> None:
     output_folder = os.path.join(JOBS_DIR, job_id, 'output')
     os.makedirs(output_folder, exist_ok=True)
     for i, dataset in enumerate(mri_datasets_train):
-        dataset.data.to_csv(os.path.join(output_folder, f"{train_names[i]}_predicted.csv"), index=False)
+        df = dataset.data
+        df['label'] = label
+        df.to_csv(os.path.join(output_folder, f"{train_names[i]}_{label}.csv"), index=False)
     for i, dataset in enumerate(mri_datasets_validation):
-        dataset.data.to_csv(os.path.join(output_folder, f"{validation_names[i]}_predicted.csv"), index=False)
+        df = dataset.data
+        df['label'] = label
+        df.to_csv(os.path.join(output_folder, f"{validation_names[i]}_{label}.csv"), index=False)
 
 
 def process(job_id: str) -> None:

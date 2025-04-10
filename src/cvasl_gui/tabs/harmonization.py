@@ -99,7 +99,7 @@ def create_harmonization_parameters():
         dbc.Row([
             dbc.Col(html.Label("Label:", style={"marginTop": "6px"}), width=3),
             dbc.Col(
-                dcc.Input(
+                dbc.Input(
                     id="label-input",
                     type="text",
                     placeholder="Enter label...",

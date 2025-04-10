@@ -77,6 +77,19 @@ def create_prediction_parameters():
             ),
         ], className="mb-3"),
 
+        # Row for label text
+        dbc.Row([
+            dbc.Col(html.Label("Label:", style={"marginTop": "6px"}), width=3),
+            dbc.Col(
+                dbc.Input(
+                    id="prediction-label-input",
+                    type="text",
+                    placeholder="Enter label...",
+                    value="predicted",
+                ),
+            ),
+        ], className="mb-3"),
+
         html.Button("Estimate", id="prediction-start-button", n_clicks=0)
     ]
 
@@ -101,10 +114,12 @@ def update_feature_dropdown(data):
 
 @app.callback(
     Input("prediction-start-button", "n_clicks"),
+    State("model-dropdown", "value"),
     State("prediction-features-dropdown", "value"),
+    State("prediction-label-input", "value"),
     prevent_initial_call=True
 )
-def start_job(n_clicks, selected_features):
+def start_job(n_clicks, model, selected_features, label):
     if not selected_features:
         return
 
@@ -113,7 +128,9 @@ def start_job(n_clicks, selected_features):
         "train_sites": data_store.input_sites['prediction-training'],
         "validation_paths": data_store.input_files['prediction-testing'],
         "validation_sites": data_store.input_sites['prediction-testing'],
+        "model": model,
         "prediction_features": selected_features,
+        "label": label,
     }
 
     # Start job in a separate thread

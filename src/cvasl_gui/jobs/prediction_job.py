@@ -91,25 +91,17 @@ def run_prediction() -> None:
                                 target='age', cat_category='sex', cont_category='age', n_bins=2, splits=1, test_size_p=0.05, random_state=42)
 
     # Perform training and prediction
-    metrics_df, metrics_df_val, predictions_df, predictions_df_val, models = predicter.predict()
+    metrics_df, metrics_df_val, predictions_df, predictions_df_val, models = predicter.train_and_evaluate()
+    mri_datasets_train = [predicter.predict(dataset) for dataset in mri_datasets_train]
+    mri_datasets_validation = [predicter.predict(dataset) for dataset in mri_datasets_validation]
 
     # Write output
     output_folder = os.path.join(JOBS_DIR, job_id, 'output')
     os.makedirs(output_folder, exist_ok=True)
-    metrics_df.to_csv(os.path.join(output_folder, "metrics.csv"), index=False)
-    metrics_df_val.to_csv(os.path.join(output_folder, "metrics_validation.csv"), index=False)
-    predictions_df.to_csv(os.path.join(output_folder, "predictions.csv"), index=False)
-    predictions_df_val.to_csv(os.path.join(output_folder, "predictions_validation.csv"), index=False)
-
-    # Add the predicted age column to the original datasets
-    # train_dfs['predicted_age'] = predictions_df['y_pred'].values
-    # train_dfs.to_csv(os.path.join(output_folder, "train_data_predicted.csv"), index=False)
-
-    validation_dfs['predicted_age'] = predictions_df_val['y_pred'].values
-    validation_dfs.to_csv(os.path.join(output_folder, "validation_data_predicted.csv"), index=False)
-
-    # for i, df in enumerate([metrics_df, metrics_df_val, predictions_df, predictions_df_val]):
-    #     df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"), index=False)
+    for i, dataset in enumerate(mri_datasets_train):
+        dataset.data.to_csv(os.path.join(output_folder, f"{train_names[i]}_predicted.csv"), index=False)
+    for i, dataset in enumerate(mri_datasets_validation):
+        dataset.data.to_csv(os.path.join(output_folder, f"{validation_names[i]}_predicted.csv"), index=False)
 
 
 def process(job_id: str) -> None:

@@ -95,6 +95,19 @@ def create_harmonization_parameters():
             ),
         ], className="mb-3"),
 
+        # Row for label text
+        dbc.Row([
+            dbc.Col(html.Label("Label:", style={"marginTop": "6px"}), width=3),
+            dbc.Col(
+                dcc.Input(
+                    id="label-input",
+                    type="text",
+                    placeholder="Enter label...",
+                    value="harmonized",
+                ),
+            ),
+        ], className="mb-3"),
+
         html.Button("Start Job", id="start-button", n_clicks=0)
     ]
 
@@ -177,9 +190,11 @@ def update_site_indicator_dropdown(data):
     State("discrete-covariate-dropdown", "value"),
     State("continuous-covariate-dropdown", "value"),
     State("site-indicator-dropdown", "value"),
+    State("label-input", "value"),
     prevent_initial_call=True
 )
-def start_job(n_clicks, selected_features, discrete_covariate_features, continuous_covariate_features, site_indicator):
+def start_job(n_clicks, selected_features, discrete_covariate_features, continuous_covariate_features, 
+              site_indicator, label):
     if not selected_features:
         return
 
@@ -189,7 +204,8 @@ def start_job(n_clicks, selected_features, discrete_covariate_features, continuo
         "harmonization_features": selected_features,
         "discrete_covariate_features": discrete_covariate_features,
         "continuous_covariate_features": continuous_covariate_features,
-        "site_indicator": site_indicator
+        "site_indicator": site_indicator,
+        "label": label,
     }
 
     # Start job in a separate thread

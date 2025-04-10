@@ -52,6 +52,6 @@ def update_violin_plot(y_axis, group_by):
     if not y_axis:
         return {}
     data = data_store.all_data['harmonization']
-    fig = px.violin(data, y=y_axis, color=group_by, facet_col='harmonized',
+    fig = px.violin(data, y=y_axis, color=group_by, facet_col='label',
                     box=True, points='outliers') # points can be 'all', 'outliers', or False
     return fig

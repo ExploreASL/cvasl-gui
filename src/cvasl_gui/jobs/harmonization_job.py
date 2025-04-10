@@ -52,6 +52,9 @@ def run_harmonization() -> None:
     discrete_covariate_features = job_arguments["discrete_covariate_features"]
     continuous_covariate_features = job_arguments["continuous_covariate_features"]
     site_indicator = job_arguments["site_indicator"]
+    label = job_arguments["label"]
+    if label is None or label == "":
+        label = "harmonized"
 
     print("Running harmonization")
     print("Input paths:", input_paths)
@@ -67,15 +70,19 @@ def run_harmonization() -> None:
     harmonizer = NeuroCombat(harmonization_features, discrete_covariate_features,
                              continuous_covariate_features, site_indicator=site_indicator)
     output = harmonizer.harmonize(mri_datasets)
+
+    # Prepare the output datasets and add the label column
     for dataset in output:
         dataset.prepare_for_export()
+    dfs = [dataset.data for dataset in output]
+    for df in dfs:
+        df['label'] = label
 
     # Write output
-    for i, mri_dataset in enumerate(output):
-        output_folder = os.path.join(JOBS_DIR, job_id, 'output')
-        os.makedirs(output_folder, exist_ok=True)
-        df = mri_dataset.data
-        df.to_csv(os.path.join(output_folder, f"{input_names[i]}_harmonized.csv"), index=False)
+    output_folder = os.path.join(JOBS_DIR, job_id, 'output')
+    os.makedirs(output_folder, exist_ok=True)
+    for i, df in enumerate(dfs):
+        df.to_csv(os.path.join(output_folder, f"{input_names[i]}_{label}.csv"), index=False)
 
 
 def process(job_id: str) -> None:

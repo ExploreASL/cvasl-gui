@@ -124,7 +124,8 @@ def load_all_selected_files(normal_files, harmonized_files):
                     input_sites.append(int(df[site_col[0]].iloc[0]))
                 else:
                     input_sites.append(0) #TODO: how to make sure this is sensible?
-                df['harmonized'] = False
+                if not 'label' in df.columns:
+                    df['label'] = 'original'
                 normal_dfs.append(df)
                 normal_file_rows.append(f"{fname} ({len(df)})")
             except Exception as e:
@@ -140,7 +141,8 @@ def load_all_selected_files(normal_files, harmonized_files):
             file_path = os.path.join(JOBS_DIR, split[0], 'output', split[1])
             try:
                 df = pd.read_csv(file_path)
-                df['harmonized'] = True
+                if not 'label' in df.columns:
+                    df['label'] = 'harmonized'
                 harmonized_dfs.append(df)
                 harmonized_file_rows.append(f"{fname} ({len(df)})")
             except Exception as e:

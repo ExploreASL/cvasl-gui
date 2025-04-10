@@ -50,5 +50,5 @@ def update_box_plot(y_axis, group_by):
     if not y_axis:
         return {}
     data = data_store.all_data['harmonization']
-    fig = px.box(data, y=y_axis, color=group_by)
+    fig = px.box(data, y=y_axis, color=group_by, facet_col='label')
     return fig

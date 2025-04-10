@@ -60,5 +60,5 @@ def update_scatter_plot(x_axis, y_axis, group_by):
     if not x_axis or not y_axis:
         return {}
     data = data_store.all_data['harmonization']
-    fig = px.scatter(data, x=x_axis, y=y_axis, color=group_by, facet_col='harmonized', trendline='ols')
+    fig = px.scatter(data, x=x_axis, y=y_axis, color=group_by, facet_col='label', trendline='ols')
     return fig

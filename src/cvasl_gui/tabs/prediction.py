@@ -10,7 +10,7 @@ from cvasl_gui.components.job_list import run_job
 from cvasl_gui import data_store
 from cvasl_gui.components.directory_input import create_directory_input
 from cvasl_gui.components.data_table import create_data_table
-from cvasl_gui.components.feature_compare import create_feature_compare
+from cvasl_gui.components.feature_compare2 import create_feature_compare
 from cvasl_gui.components.job_list import create_job_list
 
 # Folder where job output files are stored
@@ -30,8 +30,8 @@ def create_tab_prediction():
                 title="Select testing data"),
             dbc.AccordionItem([create_data_table('prediction-testing')],
                 title="Inspect testing data"),
-            # dbc.AccordionItem([create_feature_compare()],
-            #     title="Feature comparison"),
+            dbc.AccordionItem([create_feature_compare()],
+                title="Feature comparison"),
             dbc.AccordionItem(create_prediction_parameters(),
                 title="Prediction"),
             # dbc.AccordionItem([create_job_list()],

@@ -99,17 +99,26 @@ def run_prediction() -> None:
     mri_datasets_train = [predicter.predict(dataset) for dataset in mri_datasets_train]
     mri_datasets_validation = [predicter.predict(dataset) for dataset in mri_datasets_validation]
 
-    # Write output
+    # Some final processing & Write output
     output_folder = os.path.join(JOBS_DIR, job_id, 'output')
     os.makedirs(output_folder, exist_ok=True)
     for i, dataset in enumerate(mri_datasets_train):
         df = dataset.data
+        df['age_gap'] = get_column_case_insensitive(df, 'age_predicted') - get_column_case_insensitive(df, 'age')
         df['label'] = label
         df.to_csv(os.path.join(output_folder, f"{train_names[i]}_{label}.csv"), index=False)
     for i, dataset in enumerate(mri_datasets_validation):
         df = dataset.data
+        df['age_gap'] = get_column_case_insensitive(df, 'age_predicted') - get_column_case_insensitive(df, 'age')
         df['label'] = label
         df.to_csv(os.path.join(output_folder, f"{validation_names[i]}_{label}.csv"), index=False)
+
+
+def get_column_case_insensitive(df, colname):
+    match = [c for c in df.columns if c.lower() == colname.lower()]
+    if not match:
+        raise KeyError(f"Column '{colname}' not found.")
+    return df[match[0]]
 
 
 def process(job_id: str) -> None:

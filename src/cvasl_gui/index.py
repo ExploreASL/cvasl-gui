@@ -26,8 +26,18 @@ app.layout = html.Div(
             id='tabs',
             value='1',
             children=[
-                dcc.Tab(label='Harmonize', value='1'),
-                dcc.Tab(label='Predict', value='2'),
+                dcc.Tab(
+                    label='Harmonize',
+                    value='1',
+                    style={'backgroundColor': '#f0f0f0'},  # Default tab background
+                    selected_style={'backgroundColor': '#e7f1ff', 'fontWeight': 'bold'}  # Active tab style
+                ),
+                dcc.Tab(
+                    label='Predict',
+                    value='2',
+                    style={'backgroundColor': '#f0f0f0'},  # Default tab background
+                    selected_style={'backgroundColor': '#e7f1ff', 'fontWeight': 'bold'}  # Active tab style
+                ),
             ],
             vertical=False
         ),

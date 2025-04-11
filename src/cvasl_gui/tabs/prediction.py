@@ -11,7 +11,8 @@ from cvasl_gui import data_store
 from cvasl_gui.components.directory_input import create_directory_input
 from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare2 import create_feature_compare
-from cvasl_gui.components.job_list import create_job_list
+from cvasl_gui.components.job_list import create_job_list, get_job_status
+
 
 # Folder where job output files are stored
 WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
@@ -35,7 +36,8 @@ def create_tab_prediction():
             dbc.AccordionItem(create_prediction_parameters(),
                 title="Prediction"),
             # dbc.AccordionItem([create_job_list()],
-            #     title="Runs")
+            #     title="Runs"),
+            dcc.Store(id="prediction-job-id", data=None),
         ], always_open=True)
     ])
 
@@ -90,7 +92,18 @@ def create_prediction_parameters():
             ),
         ], className="mb-3"),
 
-        html.Button("Estimate", id="prediction-start-button", n_clicks=0)
+        # Row for prediction button and status
+        dbc.Row([
+            dbc.Col(html.Label("", style={"marginTop": "6px"}), width=3),
+            dbc.Col(
+                html.Div([
+                    html.Button("Run prediction", id="prediction-start-button", n_clicks=0),
+                    html.Span("Status: ", style={"marginLeft": "10px"}),
+                    html.Span(id="prediction-job-status", children="Idle"),
+                    dcc.Interval(id="prediction-status-interval", interval=1000, n_intervals=0, disabled=True)
+                ]),
+            ),
+        ], className="mb-3"),
     ]
 
 
@@ -113,15 +126,17 @@ def update_feature_dropdown(data):
 
 
 @app.callback(
+    Output("prediction-job-id", "data"),
+    Output("prediction-status-interval", "disabled", allow_duplicate=True),
     Input("prediction-start-button", "n_clicks"),
     State("model-dropdown", "value"),
     State("prediction-features-dropdown", "value"),
     State("prediction-label-input", "value"),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
 def start_job(n_clicks, model, selected_features, label):
     if not selected_features:
-        return
+        return dash.no_update, True
 
     job_arguments = {
         "train_paths": data_store.input_files['prediction-training'],
@@ -133,7 +148,26 @@ def start_job(n_clicks, model, selected_features, label):
         "label": label,
     }
 
-    # Start job in a separate thread
-    threading.Thread(target=run_job, args=(job_arguments,False), daemon=True).start()
+    # Generate job_id or receive from run_job
+    job_id = f"job_{int(threading.get_native_id())}"
+    threading.Thread(target=run_job, args=(job_arguments, job_id, False), daemon=True).start()
 
-    return
+    return job_id, False  # enable the interval
+
+
+@app.callback(
+    Output("prediction-job-status", "children"),
+    Output("prediction-status-interval", "disabled", allow_duplicate=True),
+    Input("prediction-status-interval", "n_intervals"),
+    State("prediction-job-id", "data"),
+    prevent_initial_call=True,
+)
+def update_job_status(n, job_id):
+    if not job_id:
+        return "", True
+
+    status = get_job_status(job_id)
+
+    if status.lower() in ("completed", "failed", "cancelled"):
+        return status, True  # Stop interval
+    return status, False

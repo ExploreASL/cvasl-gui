@@ -4,11 +4,11 @@ import traceback
 import zipfile
 import json
 import numpy as np
+import pandas as pd
 
 from cvasl.prediction import PredictBrainAge
 from cvasl.dataset import MRIdataset, encode_cat_features
 
-import pandas as pd
 from sklearn.ensemble import ExtraTreesRegressor
 
 

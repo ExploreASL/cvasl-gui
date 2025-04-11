@@ -2,7 +2,6 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import os
-import json
 import threading
 
 from cvasl_gui.app import app
@@ -11,7 +10,7 @@ from cvasl_gui import data_store
 from cvasl_gui.components.directory_input import create_directory_input
 from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare import create_feature_compare
-from cvasl_gui.components.job_list import create_job_list
+from cvasl_gui.components.job_list import create_job_list, get_job_status
 
 # Folder where job output files are stored
 WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
@@ -24,6 +23,24 @@ def get_dataframe_columns():
     if df is None:
         return []
     return df.columns
+
+
+def create_tab_harmonization():
+    return html.Div([
+        dbc.Accordion([
+            dbc.AccordionItem([create_directory_input('harmonization')],
+                title="Select new input data"),
+            dbc.AccordionItem([create_data_table('harmonization')],
+                title="Inspect data"),
+            dbc.AccordionItem([create_feature_compare()],
+                title="Feature comparison"),
+            dbc.AccordionItem(create_harmonization_parameters(),
+                title="Harmonization"),
+            dbc.AccordionItem([create_job_list()],
+                title="Runs"),
+            dcc.Store(id="harmonization-job-id", data=None),
+        ], always_open=True)
+    ])
 
 
 def create_harmonization_parameters():
@@ -108,25 +125,19 @@ def create_harmonization_parameters():
             ),
         ], className="mb-3"),
 
-        html.Button("Start Job", id="start-button", n_clicks=0)
+        # Row for prediction button and status
+        dbc.Row([
+            dbc.Col(html.Label("", style={"marginTop": "6px"}), width=3),
+            dbc.Col(
+                html.Div([
+                    html.Button("Start harmonization", id="start-button", n_clicks=0),
+                    html.Span("Status: ", style={"marginLeft": "10px"}),
+                    html.Span(id="harmonization-job-status", children="Idle"),
+                    dcc.Interval(id="harmonization-status-interval", interval=1000, n_intervals=0, disabled=True)
+                ]),
+            ),
+        ], className="mb-3"),
     ]
-
-
-def create_tab_harmonization():
-    return html.Div([
-        dbc.Accordion([
-            dbc.AccordionItem([create_directory_input('harmonization')],
-                title="Select new input data"),
-            dbc.AccordionItem([create_data_table('harmonization')],
-                title="Inspect data"),
-            dbc.AccordionItem([create_feature_compare()],
-                title="Feature comparison"),
-            dbc.AccordionItem(create_harmonization_parameters(),
-                title="Harmonization"),
-            dbc.AccordionItem([create_job_list()],
-                title="Runs")
-        ], always_open=True)
-    ])
 
 
 # Populate dropdown with columns from the data table
@@ -185,6 +196,8 @@ def update_site_indicator_dropdown(data):
 
 
 @app.callback(
+    Output("harmonization-job-id", "data"),
+    Output("harmonization-status-interval", "disabled", allow_duplicate=True),
     Input("start-button", "n_clicks"),
     State("feature-dropdown", "value"),
     State("discrete-covariate-dropdown", "value"),
@@ -196,7 +209,7 @@ def update_site_indicator_dropdown(data):
 def start_job(n_clicks, selected_features, discrete_covariate_features, continuous_covariate_features, 
               site_indicator, label):
     if not selected_features:
-        return
+        return dash.no_update, True
 
     job_arguments = {
         "input_paths": data_store.input_files['harmonization'],
@@ -208,7 +221,26 @@ def start_job(n_clicks, selected_features, discrete_covariate_features, continuo
         "label": label,
     }
 
-    # Start job in a separate thread
-    threading.Thread(target=run_job, args=(job_arguments,), daemon=True).start()
+    # Generate job_id or receive from run_job
+    job_id = f"job_{int(threading.get_native_id())}"
+    threading.Thread(target=run_job, args=(job_arguments, job_id, True), daemon=True).start()
 
-    return
+    return job_id, False  # enable the interval
+
+
+@app.callback(
+    Output("harmonization-job-status", "children"),
+    Output("harmonization-status-interval", "disabled", allow_duplicate=True),
+    Input("harmonization-status-interval", "n_intervals"),
+    State("harmonization-job-id", "data"),
+    prevent_initial_call=True,
+)
+def update_job_status(n, job_id):
+    if not job_id:
+        return "", True
+
+    status = get_job_status(job_id)
+
+    if status.lower() in ("completed", "failed", "cancelled"):
+        return status, True  # Stop interval
+    return status, False

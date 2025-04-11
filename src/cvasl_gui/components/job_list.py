@@ -29,11 +29,10 @@ def create_job_list():
         dcc.Download(id="download-data")
     ])
 
-def run_job(job_arguments: dict, is_harmonization: bool = True):
+def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
     """Function to start the harmonization job"""
 
     # Create a unique folder for the job
-    job_id = str(int(time.time()))
     job_folder = os.path.join(JOBS_DIR, job_id)
     os.makedirs(job_folder, exist_ok=True)
 
@@ -92,6 +91,17 @@ def check_job_status():
             job_data.append(details)
 
     return job_data
+
+def get_job_status(job_id):
+    """Return the job status"""
+    status = "running"
+
+    status_file = os.path.join(JOBS_DIR, job_id, "job_status")
+    if os.path.exists(status_file):
+        with open(status_file) as f:
+            status = f.read()
+
+    return status
 
 def cancel_job(job_id):
     """Terminate a running job"""
@@ -156,7 +166,6 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
         html.Th("Start time"),
         html.Th("Inputs"),
         html.Th("Status"),
-        html.Th("Select"),
 
         # html.Th("Job ID"),
         # html.Th("Running?"),
@@ -176,8 +185,7 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
             html.Td(job.get("start_time", "")),
             html.Td(", ".join(job.get("arguments", {}).get("input_paths", []))),
             html.Td(job.get("status", "")),
-            html.Td(html.Button("Select", id={"type": "select-job", "index": job["id"]}, n_clicks=0)),
-            html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") == "completed" else ""),
+            html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") in ("completed", "failed") else ""),
             html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0) if job.get("running", False) else ""),
             html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0) if not job.get("running", False) else "")
         ]) for job in job_data

@@ -1,3 +1,4 @@
+import time
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
@@ -149,7 +150,7 @@ def start_job(n_clicks, model, selected_features, label):
     }
 
     # Generate job_id or receive from run_job
-    job_id = f"job_{int(threading.get_native_id())}"
+    job_id = str(int(time.time()))
     threading.Thread(target=run_job, args=(job_arguments, job_id, False), daemon=True).start()
 
     return job_id, False  # enable the interval

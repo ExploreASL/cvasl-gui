@@ -98,10 +98,18 @@ def populate_harmonized_file_list(_):
     Input({'type': 'harmonized-file-list', 'index': MATCH}, 'value')
 )
 def load_all_selected_files(normal_files, harmonized_files):
-    if not normal_files and not harmonized_files:
+    trigger_id = ctx.triggered_id
+    if isinstance(trigger_id, dict) and 'index' in trigger_id:
+        ctx_index = trigger_id['index']
+    else:
         raise PreventUpdate
-    
-    ctx_index = ctx.triggered_id['index']
+
+    # If nothing selected, clear data
+    if not normal_files and not harmonized_files:
+        data_store.input_files[ctx_index] = []
+        data_store.input_sites[ctx_index] = []
+        data_store.all_data[ctx_index] = pd.DataFrame()
+        return html.Div("No files selected")
 
     normal_dfs = []
     harmonized_dfs = []

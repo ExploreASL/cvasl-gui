@@ -31,6 +31,8 @@ def create_data_table(instance_id):
 def update_table(data):
     if data is None:
         raise PreventUpdate
+    if not ctx.triggered_id or not isinstance(ctx.triggered_id, dict):
+        raise PreventUpdate
 
     ctx_index = ctx.triggered_id['index']
     df = data_store.all_data[ctx_index]

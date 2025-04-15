@@ -148,8 +148,9 @@ def create_harmonization_parameters():
     prevent_initial_call=True
 )
 def update_feature_dropdown(data):
+    if not data: # Check if data is empty
+        return []
     return [{"label": col, "value": col} for col in data[0].keys()]
-
 
 # Populate dropdown with columns from the data table
 @app.callback(

@@ -5,5 +5,13 @@ all_data = {
   'prediction-training': None,
   'prediction-testing': None,
 }
-input_files = {}
-input_sites = {}
+input_files = {
+  'harmonization': None,
+  'prediction-training': None,
+  'prediction-testing': None,
+}
+input_sites = {
+  'harmonization': None,
+  'prediction-training': None,
+  'prediction-testing': None,
+}

@@ -24,7 +24,7 @@ harmonizers = {
     "comscanneuroharmonize": ComscanNeuroCombat,
     "autocombat": AutoCombat,
     "relief": RELIEF,
-    "combat++": CombatPlusPlus
+    "combatplusplus": CombatPlusPlus
 }
 
 def write_job_status(job_id: str, status: str) -> None:

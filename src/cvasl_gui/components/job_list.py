@@ -6,6 +6,7 @@ import time
 import subprocess
 import json
 import signal
+import traceback
 
 from cvasl_gui.app import app
 
@@ -46,16 +47,80 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
         script_path = os.path.join(os.path.dirname(__file__), "..", "jobs", "harmonization_job.py")
     else:
         script_path = os.path.join(os.path.dirname(__file__), "..", "jobs", "prediction_job.py")
-    process = subprocess.Popen([sys.executable, script_path, job_id])
+    
+    # Start process with error capture
+    try:
+        print(f"Running script: {script_path} with job ID: {job_id}")
+        process = subprocess.Popen(
+            [sys.executable, script_path, job_id],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        print(f"Started process with PID: {process.pid}")
+        
+        # Give the process a moment to start and check for immediate failures
+        time.sleep(1)
+        poll_result = process.poll()
 
-    # Save job details (so it can be monitored)
-    job_details = {
-        "id": job_id,
-        "process": process.pid,
-        "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
-    }
-    with open(os.path.join(job_folder, "job_details.json"), "w") as f:
-        json.dump(job_details, f)
+        print(f"Process poll result: {poll_result}")
+        
+        if poll_result is not None:
+            # Process has already exited - this indicates a startup error
+            stdout, stderr = process.communicate()
+            error_msg = f"Process failed to start (exit code {poll_result})\n"
+            if stderr:
+                error_msg += f"Error output:\n{stderr}\n"
+            if stdout:
+                error_msg += f"Standard output:\n{stdout}\n"
+            
+            # Write error to log file
+            error_log_path = os.path.join(job_folder, "error.log")
+            with open(error_log_path, "w") as f:
+                f.write(error_msg)
+            
+            # Write failed status
+            status_file = os.path.join(job_folder, "job_status")
+            with open(status_file, "w") as f:
+                f.write("failed")
+            
+            print(f"Job {job_id} failed to start: {error_msg}")
+            
+        # Save job details (so it can be monitored)
+        job_details = {
+            "id": job_id,
+            "process": process.pid,
+            "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "startup_error": poll_result is not None
+        }
+        with open(os.path.join(job_folder, "job_details.json"), "w") as f:
+            json.dump(job_details, f)
+            
+    except Exception as e:
+        # Handle case where subprocess.Popen itself fails
+        error_msg = f"Failed to create subprocess: {str(e)}\n{traceback.format_exc()}"
+        
+        # Write error to log file
+        error_log_path = os.path.join(job_folder, "error.log")
+        with open(error_log_path, "w") as f:
+            f.write(error_msg)
+        
+        # Write failed status
+        status_file = os.path.join(job_folder, "job_status")
+        with open(status_file, "w") as f:
+            f.write("failed")
+        
+        print(f"Job {job_id} failed to start: {error_msg}")
+        
+        # Save job details indicating failure
+        job_details = {
+            "id": job_id,
+            "process": None,
+            "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "startup_error": True
+        }
+        with open(os.path.join(job_folder, "job_details.json"), "w") as f:
+            json.dump(job_details, f)
 
 
 
@@ -76,11 +141,31 @@ def check_job_status():
             status_file = os.path.join(JOBS_DIR, job_dir, "job_status")
             if os.path.exists(status_file):
                 with open(status_file) as f:
-                    details["status"] = f.read()
+                    details["status"] = f.read().strip()
+            else:
+                # No status file yet, determine status based on process state
+                process_id = details.get("process")
+                if process_id and is_process_running(process_id):
+                    details["status"] = "running"
+                else:
+                    # Process not running and no status file - check for early exit
+                    error_log_file = os.path.join(JOBS_DIR, job_dir, "error.log")
+                    if os.path.exists(error_log_file):
+                        details["status"] = "failed"
+                    elif details.get("startup_error", False):
+                        details["status"] = "failed"
+                    else:
+                        details["status"] = "unknown"
 
             # Check if process is still running
             process_id = details.get("process")
-            details["running"] = is_process_running(process_id)
+            details["running"] = is_process_running(process_id) if process_id else False
+
+            # Load error log if it exists
+            error_log_file = os.path.join(JOBS_DIR, job_dir, "error.log")
+            if os.path.exists(error_log_file):
+                with open(error_log_file) as f:
+                    details["error_log"] = f.read()
 
             # Load job arguments
             if os.path.exists(job_arguments_file):
@@ -130,6 +215,8 @@ def remove_job(job_id):
 
 def is_process_running(pid):
     """Check if a process is running"""
+    if pid is None:
+        return False
     try:
         result = subprocess.run(["ps", "-p", str(pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.returncode == 0  # Return True if process is found
@@ -166,31 +253,55 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
         html.Th("Start time"),
         html.Th("Inputs"),
         html.Th("Status"),
-
-        # html.Th("Job ID"),
-        # html.Th("Running?"),
-        # html.Th("Status"),
-        # html.Th("Start Time"),
-        # html.Th("Download"),
-        # html.Th("Cancel"),
-        # html.Th("Remove")
+        html.Th("Actions")
     ])
 
     # On select: download, remove
 
-    table_rows = [
-        html.Tr([
-#            html.Td(job.get("id", "")),
-#            html.Td("Yes" if job.get("running", False) else "No"),
+    table_rows = []
+    for job in job_data:
+        # Create status cell with error details if available
+        status_content = job.get("status", "")
+        if job.get("error_log") and job.get("status") == "failed":
+            # Show a collapsible error details
+            status_content = html.Div([
+                html.Span("failed", style={"color": "red", "font-weight": "bold"}),
+                html.Details([
+                    html.Summary("Show error details", style={"cursor": "pointer", "color": "blue"}),
+                    html.Pre(job["error_log"], style={
+                        "background": "#f5f5f5", 
+                        "padding": "10px", 
+                        "border": "1px solid #ddd",
+                        "max-height": "200px",
+                        "overflow": "auto",
+                        "white-space": "pre-wrap",
+                        "font-size": "12px"
+                    })
+                ])
+            ])
+        elif job.get("status") == "failed":
+            status_content = html.Span("failed", style={"color": "red", "font-weight": "bold"})
+        elif job.get("status") == "completed":
+            status_content = html.Span("completed", style={"color": "green", "font-weight": "bold"})
+        elif job.get("running"):
+            status_content = html.Span("running", style={"color": "blue", "font-weight": "bold"})
+        
+        # Create actions cell
+        actions = []
+        if job.get("status", "") in ("completed", "failed"):
+            actions.append(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0, style={"margin-right": "5px"}))
+        if job.get("running", False):
+            actions.append(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0, style={"margin-right": "5px"}))
+        if not job.get("running", False):
+            actions.append(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0, style={"margin-right": "5px"}))
+        
+        table_rows.append(html.Tr([
             html.Td(job.get("start_time", "")),
             html.Td(", ".join(job.get("arguments", {}).get("input_paths", []))),
-            html.Td(job.get("status", "")),
-            html.Td(html.Button("Download", id={"type": "download-output", "index": job["id"]}, n_clicks=0) if job.get("status", "") in ("completed", "failed") else ""),
-            html.Td(html.Button("Cancel", id={"type": "cancel-job", "index": job["id"]}, n_clicks=0) if job.get("running", False) else ""),
-            html.Td(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0) if not job.get("running", False) else "")
-        ]) for job in job_data
-    ]
-
+            html.Td(status_content),
+            html.Td(actions)
+        ]))
+    
     return html.Table([table_header] + table_rows, style={"width": "100%", "border": "1px solid black"})
 
 

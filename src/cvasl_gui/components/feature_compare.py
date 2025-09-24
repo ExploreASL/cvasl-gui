@@ -6,7 +6,7 @@ from cvasl_gui.components.plots import scatter_plot
 from cvasl_gui.app import app
 
 
-def create_tab_compare():
+def create_feature_compare():
     return html.Div([
 
         # Plot selection
@@ -33,18 +33,15 @@ def create_tab_compare():
      Input('btn-scatter', 'n_clicks')]
 )
 def display_content(btn_violin, btn_box, btn_scatter):
-    # Determine which button has been clicked most recently
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]  # Default: show violin plot
-    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    # Determine which plot type was selected
+    plot_type = get_plot_type()
 
     # Map buttons to plots
-    if button_id == 'btn-violin':
+    if plot_type == 'violin':
         return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
-    elif button_id == 'btn-box':
+    elif plot_type == 'box':
         return [{'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
-    elif button_id == 'btn-scatter':
+    elif plot_type == 'scatter':
         return [{'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
 
     return [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}]  # Fallback
@@ -60,7 +57,8 @@ def display_content(btn_violin, btn_box, btn_scatter):
     Input('btn-scatter', 'n_clicks')
 )
 def update_button_styles(btn_violin, btn_box, btn_scatter):
-    plot_type = get_plot_type(btn_violin, btn_box, btn_scatter)
+    # Determine which plot type was selected
+    plot_type = get_plot_type()
 
     # Highlight the selected button
     return (
@@ -70,7 +68,7 @@ def update_button_styles(btn_violin, btn_box, btn_scatter):
     )
 
 
-def get_plot_type(btn_violin, btn_box, btn_scatter):
+def get_plot_type():
     # Determine which button was clicked most recently
     ctx = dash.callback_context
     if not ctx.triggered:

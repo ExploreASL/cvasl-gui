@@ -4,7 +4,11 @@ __pycache__/
 *.py[cod]
 
 build/
+data/
 dist/
+/jobs/
+!*/jobs/
+temp/
 *.egg-info/
 
 .env

@@ -1,4 +1,5 @@
 from dash import html, dcc, Input, Output, ctx
+import pandas as pd
 from cvasl_gui.app import app
 import plotly.express as px
 from cvasl_gui import data_store
@@ -8,31 +9,32 @@ layout = html.Div([
     html.Div([
         html.Label("Column to plot"),
         dcc.Dropdown(
-            id='box-y-axis',
+            id='box-y-axis2',
             placeholder="Select a column"
         ),
         html.Label("Group by"),
         dcc.Dropdown(
-            id='box-group-by',
+            id='box-group-by2',
             placeholder="Select a column"
         )
     ], style={'flex': '1', 'padding': '10px'}),
 
     html.Div([
-        dcc.Graph(id='box-plot')
+        dcc.Graph(id='box-plot2')
     ], style={'flex': '2', 'padding': '10px'})
 ], style={'display': 'flex', 'width': '100%'})
 
 
 @app.callback(
-    Output('box-y-axis', 'options'),
-    Output('box-y-axis', 'value'),
-    Output('box-group-by', 'options'),
-    Output('box-group-by', 'value'),
-    Input({'type': 'data-table', 'index': 'harmonization'}, 'data')
+    Output('box-y-axis2', 'options'),
+    Output('box-y-axis2', 'value'),
+    Output('box-group-by2', 'options'),
+    Output('box-group-by2', 'value'),
+    Input({'type': 'data-table', 'index': 'prediction-training'}, 'data'),
+    Input({'type': 'data-table', 'index': 'prediction-testing'}, 'data'),
 )
-def update_box_dropdowns(data):
-    df = data_store.all_data['harmonization']
+def update_box_dropdowns(data, data2):
+    df = data_store.all_data['prediction-training']
     if not hasattr(data_store, 'all_data') or df is None:
         return [], None, [], None
     columns = [{'label': col, 'value': col} for col in df.columns]
@@ -42,13 +44,15 @@ def update_box_dropdowns(data):
 
 
 @app.callback(
-    Output('box-plot', 'figure'),
-    Input('box-y-axis', 'value'),
-    Input('box-group-by', 'value')
+    Output('box-plot2', 'figure'),
+    Input('box-y-axis2', 'value'),
+    Input('box-group-by2', 'value')
 )
 def update_box_plot(y_axis, group_by):
     if not y_axis:
         return {}
-    data = data_store.all_data['harmonization']
+    df1 = data_store.all_data['prediction-training']
+    df2 = data_store.all_data['prediction-testing']
+    data = pd.concat([df1, df2], ignore_index=True)
     fig = px.box(data, y=y_axis, color=group_by, facet_col='label')
     return fig

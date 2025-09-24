@@ -48,15 +48,21 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
     else:
         script_path = os.path.join(os.path.dirname(__file__), "..", "jobs", "prediction_job.py")
     
-    # Start process with error capture
+    # Start process with output redirected to files
     try:
         print(f"Running script: {script_path} with job ID: {job_id}")
-        process = subprocess.Popen(
-            [sys.executable, script_path, job_id],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        
+        # Create output files for stdout and stderr
+        stdout_file = os.path.join(job_folder, "stdout.log")
+        stderr_file = os.path.join(job_folder, "stderr.log")
+        
+        with open(stdout_file, "w") as stdout_f, open(stderr_file, "w") as stderr_f:
+            process = subprocess.Popen(
+                [sys.executable, script_path, job_id],
+                stdout=stdout_f,
+                stderr=stderr_f,
+                text=True
+            )
         print(f"Started process with PID: {process.pid}")
         
         # Give the process a moment to start and check for immediate failures
@@ -67,12 +73,20 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
         
         if poll_result is not None:
             # Process has already exited - this indicates a startup error
-            stdout, stderr = process.communicate()
             error_msg = f"Process failed to start (exit code {poll_result})\n"
-            if stderr:
-                error_msg += f"Error output:\n{stderr}\n"
-            if stdout:
-                error_msg += f"Standard output:\n{stdout}\n"
+            
+            # Read stderr and stdout from files if they exist
+            if os.path.exists(stderr_file):
+                with open(stderr_file, "r") as f:
+                    stderr_content = f.read()
+                    if stderr_content:
+                        error_msg += f"Error output:\n{stderr_content}\n"
+            
+            if os.path.exists(stdout_file):
+                with open(stdout_file, "r") as f:
+                    stdout_content = f.read()
+                    if stdout_content:
+                        error_msg += f"Standard output:\n{stdout_content}\n"
             
             # Write error to log file
             error_log_path = os.path.join(job_folder, "error.log")

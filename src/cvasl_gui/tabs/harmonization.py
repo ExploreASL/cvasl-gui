@@ -21,12 +21,30 @@ INPUT_DIR = os.path.join(WORKING_DIR, 'data')
 JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
 ALGORITHM_PARAMS = {
-        "neuroharmonize": ["features-to-harmonize", "covariates", "smooth-terms", "site-indicator", "empirical-bayes" ],
-        "covbat": ["features-to-harmonize", "covariates", "site-indicator", "patient-identifier", "numerical-covariates", "empirical-bayes" ],
-        "neurocombat": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "site-indicator", "patient-identifier", "empirical-bayes", "mean-only", "parametric" ],
-        "nestedcombat": ["features-to-harmonize", "batch-list-harmonisations", "site-indicator", "discrete-covariates", "continuous-covariates", "intermediate-results-path", "patient-identifier", "return-extended", "use-gmm" ],
-        "autocombat": ["data-subset", "features-to-harmonize", "site-indicator", "discrete-covariates", "continuous-covariates", "discrete-cluster-features", "continuous-cluster-features", "metric", "features-reduction", "feature-reduction-dimensions", "empirical-bayes" ],
-        "relief": ["features-to-harmonize", "covariates", "patient-identifier", "intermediate-results-path" ]
+    "neurocombat": {
+        "label": "NeuroCombat",
+        "parameters": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "site-indicator", "patient-identifier", "empirical-bayes", "mean-only", "parametric" ]
+    },
+    "neuroharmonize": {
+        "label": "NeuroHarmonize",
+        "parameters": ["features-to-harmonize", "covariates", "smooth-terms", "site-indicator", "empirical-bayes" ]
+    },
+    "covbat": {
+        "label": "CovBat",
+        "parameters": ["features-to-harmonize", "covariates", "site-indicator", "patient-identifier", "numerical-covariates", "empirical-bayes" ]
+    },
+    "nestedcombat": {
+        "label": "OPNested ComBat",
+        "parameters": ["features-to-harmonize", "batch-list-harmonisations", "site-indicator", "discrete-covariates", "continuous-covariates", "intermediate-results-path", "patient-identifier", "return-extended", "use-gmm" ]
+    },
+    "autocombat": {
+        "label": "AutoComBat",
+        "parameters": ["data-subset", "features-to-harmonize", "site-indicator", "discrete-covariates", "continuous-covariates", "discrete-cluster-features", "continuous-cluster-features", "metric", "features-reduction", "feature-reduction-dimensions", "empirical-bayes" ]
+    },
+    "relief": {
+        "label": "RELIEF",
+        "parameters": ["features-to-harmonize", "covariates", "patient-identifier", "intermediate-results-path" ]
+    }
 }
 
 
@@ -116,14 +134,7 @@ def create_harmonization_parameters():
                 dcc.Dropdown(
                     id="algorithm-dropdown",
                     options=[
-                        {"label": "NeuroCombat", "value": "neurocombat"},
-                        {"label": "NeuroHarmonize", "value": "neuroharmonize"},
-                        {"label": "Covbat", "value": "covbat"},
-                        {"label": "NestedCombat", "value": "nestedcombat"},
-                        {"label": "ComscanNeuroHarmonize", "value": "comscanneuroharmonize"},
-                        {"label": "AutoCombat", "value": "autocombat"},
-                        {"label": "Relief", "value": "relief"},
-                        {"label": "Combat++", "value": "combatplusplus"},
+                        {"label": v["label"], "value": k} for k, v in ALGORITHM_PARAMS.items()
                     ],
                     value="neurocombat",
                     clearable=False,

@@ -13,10 +13,40 @@ from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare import create_feature_compare
 from cvasl_gui.components.job_list import create_job_list, get_job_status
 
+from cvasl_gui.tabs.parameters import parameters
+
 # Folder where job output files are stored
 WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
 INPUT_DIR = os.path.join(WORKING_DIR, 'data')
 JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
+
+ALGORITHM_PARAMS = {
+    "neurocombat": {
+        "label": "NeuroCombat",
+        "parameters": ["features_to_harmonize", "discrete_covariates", "continuous_covariates", "site_indicator", "patient_identifier", "empirical_bayes", "mean_only", "parametric" ]
+    },
+    "neuroharmonize": {
+        "label": "NeuroHarmonize",
+        "parameters": ["features_to_harmonize", "covariates", "smooth_terms", "site_indicator", "empirical_bayes" ]
+    },
+    "covbat": {
+        "label": "CovBat",
+        "parameters": ["features_to_harmonize", "covariates", "site_indicator", "patient_identifier", "numerical_covariates", "empirical_bayes" ]
+    },
+    "nestedcombat": {
+        "label": "OPNested ComBat",
+        "parameters": ["features_to_harmonize", "batch_list_harmonisations", "site_indicator", "discrete_covariates", "continuous_covariates", "intermediate_results_path", "patient_identifier", "return_extended", "use_gmm" ]
+    },
+    "autocombat": {
+        "label": "AutoComBat",
+        "parameters": ["data_subset", "features_to_harmonize", "site_indicator", "discrete_covariates", "continuous_covariates", "discrete_cluster_features", "continuous_cluster_features", "metric", "features_reduction", "feature_reduction_dimensions", "empirical_bayes" ]
+    },
+    "relief": {
+        "label": "RELIEF",
+        "parameters": ["features_to_harmonize", "covariates", "patient_identifier", "intermediate_results_path" ]
+    }
+}
+
 
 
 def get_dataframe_columns():
@@ -44,89 +74,110 @@ def create_tab_harmonization():
     ])
 
 
+def create_parameter_component(parameter_data, width=3):
+    id = parameter_data[0]
+    label_text = parameter_data[1]["label"]
+    parameter_type = parameter_data[1]["type"]
+    description = parameter_data[1].get("description", "")
+    default_value = parameter_data[1].get("default", None)
+
+    # Depending on the type, create the appropriate input component
+    parameter_control = None
+    match parameter_type:
+        case "feature-list-multi":
+            parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
+                                            multi=True, placeholder="select features..."),
+        case "feature-list-single":
+            parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
+                                            multi=False, placeholder="select feature..."),
+        case "selection":
+            options = parameter_data[1].get("options", [])
+            parameter_control = dcc.Dropdown(id=f"{id}-dropdown", 
+                                            options=[{"label": opt, "value": opt} for opt in options],
+                                            multi=False, placeholder="select option..."),
+        case "str":
+            parameter_control = dbc.Input(id=f"{id}-input", type="text",
+                                         placeholder="enter value..."),
+        case "int":
+            parameter_control = dbc.Input(id=f"{id}-input", type="number",
+                                         placeholder="enter integer..."),
+        case "bool":
+            bool_default = default_value if default_value is not None else False
+            parameter_control = dbc.Checkbox(id=f"{id}-checkbox", value=bool_default,
+                                             style={"marginTop": "6px"}),
+
+    return dbc.Row([
+        dbc.Col(
+            html.Div([
+                html.Label(
+                    label_text,
+                    style={"marginTop": "6px", "marginRight": "5px", "marginBottom": "0"}
+                ),
+                html.Span(
+                    "i",
+                    id=f"{id}-target",
+                    style={
+                        "cursor": "pointer",
+                        "fontFamily": "serif",
+                        "fontWeight": "bold",
+                        "fontStyle": "italic",
+                        "border": "2px solid #97b0d4",
+                        "borderRadius": "50%",
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "width": "18px",
+                        "height": "18px",
+                        "fontSize": "12px",
+                        "lineHeight": "1",
+                        "textAlign": "center",
+                        "color": "#97b0d4",
+                        "verticalAlign": "middle"
+                    }
+                ),
+                dbc.Tooltip(
+                    description,
+                    target=f"{id}-target",
+                    placement="right",
+                    trigger="hover"
+                )
+            ], style={"display": "flex", "alignItems": "center", "gap": "5px"}
+            ), width=width
+        ),
+        dbc.Col(parameter_control),
+    ], className="mb-3", id=f"row-{id}")
+
+
+
 def create_harmonization_parameters():
+
     return [
-        # Row for algorithm selection
         dbc.Row([
-            dbc.Col(html.Label("Algorithm:", style={"marginTop": "6px"}), width=3),
+            dbc.Col(html.Label("Algorithm", style={"marginTop": "6px"}), width=3),
             dbc.Col(
                 dcc.Dropdown(
                     id="algorithm-dropdown",
                     options=[
-                        {"label": "NeuroCombat", "value": "neurocombat"},
+                        {"label": v["label"], "value": k} for k, v in ALGORITHM_PARAMS.items()
                     ],
                     value="neurocombat",
                     clearable=False,
                 ),
             ),
-        ], className="mb-3"),
+        ], className="mb-3", id="row-algorithm"),
 
-        # Row for main feature selection
+        # Instantiate a parameter component for each parameter,
+        # they will be dynamically shown/hidden based on the selected algorithm
+        *[create_parameter_component(parameter_data) for parameter_data in parameters.items()],
+
         dbc.Row([
-            dbc.Col(html.Label("Features:", style={"marginTop": "6px"}), width=3),
-            dbc.Col(
-                dcc.Dropdown(
-                    id="feature-dropdown",
-                    options=[{"label": col, "value": col} for col in get_dataframe_columns()],
-                    multi=True,
-                    placeholder="Select features...",
-                ),
+            dbc.Col(html.Label("Label", style={"marginTop": "6px"}), width=3),
+            dbc.Col(dbc.Input(id="label-input", type="text",
+                placeholder="Enter label...", value="neurocombat"),
             ),
-        ], className="mb-3"),
+        ], className="mb-3", id="row-label-input"),
 
-        # Row for discrete covariate features
-        dbc.Row([
-            dbc.Col(html.Label("Discrete covariate features:", style={"marginTop": "6px"}), width=3),
-            dbc.Col(
-                dcc.Dropdown(
-                    id="discrete-covariate-dropdown",
-                    options=[{"label": col, "value": col} for col in get_dataframe_columns()],
-                    multi=True,
-                    placeholder="Select discrete covariates...",
-                ),
-            ),
-        ], className="mb-3"),
-
-        # Row for continuous covariate features
-        dbc.Row([
-            dbc.Col(html.Label("Continuous covariate features:", style={"marginTop": "6px"}), width=3),
-            dbc.Col(
-                dcc.Dropdown(
-                    id="continuous-covariate-dropdown",
-                    options=[{"label": col, "value": col} for col in get_dataframe_columns()],
-                    multi=True,
-                    placeholder="Select continuous covariates...",
-                ),
-            ),
-        ], className="mb-3"),
-
-        # Row for site indicator
-        dbc.Row([
-            dbc.Col(html.Label("Site indicator:", style={"marginTop": "6px"}), width=3),
-            dbc.Col(
-                dcc.Dropdown(
-                    id="site-indicator-dropdown",
-                    options=[{"label": col, "value": col} for col in get_dataframe_columns()],
-                    multi=False,
-                    placeholder="Select site indicator...",
-                ),
-            ),
-        ], className="mb-3"),
-
-        # Row for label text
-        dbc.Row([
-            dbc.Col(html.Label("Label:", style={"marginTop": "6px"}), width=3),
-            dbc.Col(
-                dbc.Input(
-                    id="label-input",
-                    type="text",
-                    placeholder="Enter label...",
-                    value="harmonized",
-                ),
-            ),
-        ], className="mb-3"),
-
-        # Row for prediction button and status
+        # Row for button and status
         dbc.Row([
             dbc.Col(html.Label("", style={"marginTop": "6px"}), width=3),
             dbc.Col(
@@ -141,9 +192,53 @@ def create_harmonization_parameters():
     ]
 
 
-# Populate dropdown with columns from the data table
 @app.callback(
-    Output("feature-dropdown", "options"),
+    [ Output(f"row-{id}", "style") for id in parameters.keys() ],
+    Input("algorithm-dropdown", "value"),
+)
+def toggle_rows(algorithm):
+    """Show/hide parameter rows based on the selected algorithm and hide property"""
+    active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
+    
+    styles = []
+    for param_id in parameters.keys():
+        # Check if parameter should be hidden
+        should_hide = parameters[param_id].get("hide", False)
+        
+        # Show if it's active for the algorithm and not marked as hidden
+        if param_id in active_parameters and not should_hide:
+            styles.append({"display": "flex"})
+        else:
+            styles.append({"display": "none"})
+    
+    return styles
+
+
+@app.callback(
+    Output("label-input", "value"),
+    Input("algorithm-dropdown", "value"),
+)
+def update_label_from_algorithm(algorithm):
+    """Update the label input to match the selected algorithm name"""
+    return algorithm.lower() if algorithm else "harmonized"
+
+
+#
+#  Populate the dropdowns with columns from the data table
+#
+
+@app.callback(
+    Output("data_subset-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_data_subset_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("features_to_harmonize-dropdown", "options"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -152,10 +247,9 @@ def update_feature_dropdown(data):
         return []
     return [{"label": col, "value": col} for col in data[0].keys()]
 
-# Populate dropdown with columns from the data table
 @app.callback(
-    Output("discrete-covariate-dropdown", "options"),
-    Output("discrete-covariate-dropdown", "value"),
+    Output("discrete_covariates-dropdown", "options"),
+    Output("discrete_covariates-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -166,11 +260,9 @@ def update_discrete_covariate_dropdown(data):
     default_value = ["Sex"] if "Sex" in data[0].keys() else None
     return options, default_value
 
-
-# Populate dropdown with columns from the data table
 @app.callback(
-    Output("continuous-covariate-dropdown", "options"),
-    Output("continuous-covariate-dropdown", "value"),
+    Output("continuous_covariates-dropdown", "options"),
+    Output("continuous_covariates-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -181,11 +273,9 @@ def update_continuous_covariate_dropdown(data):
     default_value = ["Age"] if "Age" in data[0].keys() else None
     return options, default_value
 
-
-# Populate dropdown with columns from the data table
 @app.callback(
-    Output("site-indicator-dropdown", "options"),
-    Output("site-indicator-dropdown", "value"),
+    Output("site_indicator-dropdown", "options"),
+    Output("site_indicator-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -196,30 +286,159 @@ def update_site_indicator_dropdown(data):
     default_value = "Site" if "Site" in data[0].keys() else None
     return options, default_value
 
+@app.callback(
+    Output("patient_identifier-dropdown", "options"),
+    Output("patient_identifier-dropdown", "value"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_patient_identifier_dropdown(data):
+    if not data:
+        return [], None
+    options = [{"label": col, "value": col} for col in data[0].keys()]
+    default_value = "participant_id" if "participant_id" in data[0].keys() else None
+    return options, default_value
+
+@app.callback(
+    Output("covariates-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_covariates_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("batch_list_harmonisations-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_batch_list_harmonisations_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("numerical_covariates-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_numerical_covariates_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("smooth_terms-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_smooth_terms_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("discrete_cluster_features-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_discrete_cluster_features_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("continuous_cluster_features-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_continuous_cluster_features_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
 
 @app.callback(
     Output("harmonization-job-id", "data"),
     Output("harmonization-status-interval", "disabled", allow_duplicate=True),
     Input("start-button", "n_clicks"),
-    State("feature-dropdown", "value"),
-    State("discrete-covariate-dropdown", "value"),
-    State("continuous-covariate-dropdown", "value"),
-    State("site-indicator-dropdown", "value"),
+    State("algorithm-dropdown", "value"),
     State("label-input", "value"),
+    # Add all parameter controls as State
+    State("data_subset-dropdown", "value"),
+    State("features_to_harmonize-dropdown", "value"),
+    State("batch_list_harmonisations-dropdown", "value"),
+    State("covariates-dropdown", "value"),
+    State("discrete_covariates-dropdown", "value"),
+    State("continuous_covariates-dropdown", "value"),
+    State("numerical_covariates-dropdown", "value"),
+    State("smooth_terms-dropdown", "value"),
+    State("discrete_cluster_features-dropdown", "value"),
+    State("continuous_cluster_features-dropdown", "value"),
+    State("metric-dropdown", "value"),
+    State("features_reduction-dropdown", "value"),
+    State("feature_reduction_dimensions-input", "value"),
+    State("empirical_bayes-checkbox", "value"),
+    State("mean_only-checkbox", "value"),
+    State("parametric-checkbox", "value"),
+    State("return_extended-checkbox", "value"),
+    State("use_gmm-checkbox", "value"),
+    State("site_indicator-dropdown", "value"),
+    State("patient_identifier-dropdown", "value"),
+    State("intermediate_results_path-input", "value"),
     prevent_initial_call=True
 )
-def start_job(n_clicks, selected_features, discrete_covariate_features, continuous_covariate_features, 
-              site_indicator, label):
-    if not selected_features:
+def start_job(n_clicks, algorithm, label, 
+              data_subset, features_to_harmonize, batch_list_harmonisations, covariates,
+              discrete_covariates, continuous_covariates, numerical_covariates, smooth_terms,
+              discrete_cluster_features, continuous_cluster_features, metric, features_reduction,
+              feature_reduction_dimensions, empirical_bayes, mean_only, parametric, 
+              return_extended, use_gmm, site_indicator, patient_identifier, intermediate_results_path):
+    
+    if not features_to_harmonize:
         return dash.no_update, True
+    
+    # Get active parameters for the selected algorithm
+    active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
+    
+    # Map parameter names to their values
+    param_values = {
+        "data_subset": data_subset,
+        "features_to_harmonize": features_to_harmonize,
+        "batch_list_harmonisations": batch_list_harmonisations,
+        "covariates": covariates,
+        "discrete_covariates": discrete_covariates,
+        "continuous_covariates": continuous_covariates,
+        "numerical_covariates": numerical_covariates,
+        "smooth_terms": smooth_terms,
+        "discrete_cluster_features": discrete_cluster_features,
+        "continuous_cluster_features": continuous_cluster_features,
+        "metric": metric,
+        "features_reduction": features_reduction,
+        "feature_reduction_dimensions": feature_reduction_dimensions,
+        "empirical_bayes": empirical_bayes,
+        "mean_only": mean_only,
+        "parametric": parametric,
+        "return_extended": return_extended,
+        "use_gmm": use_gmm,
+        "site_indicator": site_indicator,
+        "patient_identifier": patient_identifier,
+        "intermediate_results_path": intermediate_results_path,
+    }
+    
+    # Build parameters dict with only active parameters that have values
+    job_parameters = {}
+    for param in active_parameters:
+        if param in param_values and param_values[param] is not None:
+            job_parameters[param] = param_values[param]
 
     job_arguments = {
+        "algorithm": algorithm,
         "input_paths": data_store.input_files['harmonization'],
         "input_sites": data_store.input_sites['harmonization'],
-        "harmonization_features": selected_features,
-        "discrete_covariate_features": discrete_covariate_features,
-        "continuous_covariate_features": continuous_covariate_features,
-        "site_indicator": site_indicator,
+        "parameters": job_parameters,
         "label": label,
     }
 

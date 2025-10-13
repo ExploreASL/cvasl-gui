@@ -108,15 +108,32 @@ def create_parameter_component(parameter_data, width=3):
 
     return dbc.Row([
         dbc.Col(
-            dbc.Row([
+            html.Div([
                 html.Label(
                     label_text,
-                    style={"marginTop": "6px", "marginRight": "5px"}
+                    style={"marginTop": "6px", "marginRight": "5px", "marginBottom": "0"}
                 ),
-                html.I(
-                    className="bi bi-info-circle-fill",
+                html.Span(
+                    "i",
                     id=f"{id}-target",
-                    style={"cursor": "pointer", "color": "#0d6efd"}
+                    style={
+                        "cursor": "pointer",
+                        "fontFamily": "serif",
+                        "fontWeight": "bold",
+                        "fontStyle": "italic",
+                        "border": "2px solid #97b0d4",
+                        "borderRadius": "50%",
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "width": "18px",
+                        "height": "18px",
+                        "fontSize": "12px",
+                        "lineHeight": "1",
+                        "textAlign": "center",
+                        "color": "#97b0d4",
+                        "verticalAlign": "middle"
+                    }
                 ),
                 dbc.Tooltip(
                     description,
@@ -124,7 +141,7 @@ def create_parameter_component(parameter_data, width=3):
                     placement="right",
                     trigger="hover"
                 )
-            ], align="center"
+            ], style={"display": "flex", "alignItems": "center", "gap": "5px"}
             ), width=width
         ),
         dbc.Col(parameter_control),

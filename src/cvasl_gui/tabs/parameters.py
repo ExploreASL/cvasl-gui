@@ -1,15 +1,15 @@
 parameters = {
-    "data-subset": {
+    "data_subset": {
         "type": "feature-list-multi",
         "label": "Data subset",
         "description": "Features of the dataset subset to be passed to autocombat for harmonization.",
     },
-    "features-to-harmonize": {
+    "features_to_harmonize": {
         "type": "feature-list-multi",
         "label": "Features to harmonize",
         "description": "Features to harmonize excluding covariates and site indicator.",
     },
-    "batch-list-harmonisations": {
+    "batch_list_harmonisations": {
         "type": "feature-list-multi",
         "label": "Batch list harmonisations",
         "description": "List of batch variables for nested ComBat.",
@@ -19,32 +19,32 @@ parameters = {
         "label": "Covariates",
         "description": "Covariates to control for during harmonization.",
     },
-    "discrete-covariates": {
+    "discrete_covariates": {
         "type": "feature-list-multi",
         "label": "Discrete covariates",
         "description": "Discrete covariates to control for during harmonization.",
     },
-    "continuous-covariates": {
+    "continuous_covariates": {
         "type": "feature-list-multi",
         "label": "Continuous covariates",
         "description": "Continuous covariates to control for during harmonization.",
     },
-    "numerical-covariates": {
+    "numerical_covariates": {
         "type": "feature-list-multi",
         "label": "Numerical covariates",
         "description": "Numerical covariates for CovBat harmonization.",
     },
-    "smooth-terms": {
+    "smooth_terms": {
         "type": "feature-list-multi",
         "label": "Smooth terms",
         "description": "Names of columns to include as smooth, nonlinear terms.",
     },
-    "discrete-cluster-features": {
+    "discrete_cluster_features": {
         "type": "feature-list-multi",
         "label": "Discrete cluster features",
         "description": "Target site features which are categorical to one-hot encode for clustering.",
     },
-    "continuous-cluster-features": {
+    "continuous_cluster_features": {
         "type": "feature-list-multi",
         "label": "Continuous cluster features",
         "description": "Target site features which are continuous to scale for clustering.",
@@ -54,22 +54,22 @@ parameters = {
         "label": "Metric",
         "description": "Metric to define the optimal number of clusters.",
     },
-    "features-reduction": {
+    "features_reduction": {
         "type": "str",
         "label": "Features reduction",
         "description": "Method for reduction of the embedded space with n_components.",
     },
-    "feature-reduction-dimensions": {
+    "feature_reduction_dimensions": {
         "type": "int",
         "label": "Feature reduction dimensions",
         "description": "Dimension of the embedded space for features reduction.",
     },
-    "empirical-bayes": {
+    "empirical_bayes": {
         "type": "bool",
         "label": "Empirical bayes",
         "description": "Whether to use empirical Bayes estimates of site effects.",
     },
-    "mean-only": {
+    "mean_only": {
         "type": "bool",
         "label": "Mean only",
         "description": "Whether to perform mean-only adjustment.",
@@ -79,27 +79,27 @@ parameters = {
         "label": "Parametric",
         "description": "Whether to use parametric adjustments.",
     },
-    "return-extended": {
+    "return_extended": {
         "type": "bool",
         "label": "Return extended",
         "description": "Whether to return extended outputs (intermediate dataframes).",
     },
-    "use-gmm": {
+    "use_gmm": {
         "type": "bool",
         "label": "Use GMM",
         "description": "Whether to use Gaussian Mixture Model (GMM) for grouping.",
     },
-    "site-indicator": {
+    "site_indicator": {
         "type": "feature-list-single",
         "label": "Site indicator",
         "description": "Feature that differentiates different sites.",
     },
-    "patient-identifier": {
+    "patient_identifier": {
         "type": "feature-list-single",
         "label": "Patient identifier",
         "description": "Column name identifying each patient.",
     },
-    "intermediate-results-path": {
+    "intermediate_results_path": {
         "type": "str",
         "label": "Intermediate results path",
         "description": "Path to save intermediate results.",

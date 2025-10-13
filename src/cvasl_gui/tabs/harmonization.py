@@ -23,27 +23,27 @@ JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 ALGORITHM_PARAMS = {
     "neurocombat": {
         "label": "NeuroCombat",
-        "parameters": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "site-indicator", "patient-identifier", "empirical-bayes", "mean-only", "parametric" ]
+        "parameters": ["features_to_harmonize", "discrete_covariates", "continuous_covariates", "site_indicator", "patient_identifier", "empirical_bayes", "mean_only", "parametric" ]
     },
     "neuroharmonize": {
         "label": "NeuroHarmonize",
-        "parameters": ["features-to-harmonize", "covariates", "smooth-terms", "site-indicator", "empirical-bayes" ]
+        "parameters": ["features_to_harmonize", "covariates", "smooth_terms", "site_indicator", "empirical_bayes" ]
     },
     "covbat": {
         "label": "CovBat",
-        "parameters": ["features-to-harmonize", "covariates", "site-indicator", "patient-identifier", "numerical-covariates", "empirical-bayes" ]
+        "parameters": ["features_to_harmonize", "covariates", "site_indicator", "patient_identifier", "numerical_covariates", "empirical_bayes" ]
     },
     "nestedcombat": {
         "label": "OPNested ComBat",
-        "parameters": ["features-to-harmonize", "batch-list-harmonisations", "site-indicator", "discrete-covariates", "continuous-covariates", "intermediate-results-path", "patient-identifier", "return-extended", "use-gmm" ]
+        "parameters": ["features_to_harmonize", "batch_list_harmonisations", "site_indicator", "discrete_covariates", "continuous_covariates", "intermediate_results_path", "patient_identifier", "return_extended", "use_gmm" ]
     },
     "autocombat": {
         "label": "AutoComBat",
-        "parameters": ["data-subset", "features-to-harmonize", "site-indicator", "discrete-covariates", "continuous-covariates", "discrete-cluster-features", "continuous-cluster-features", "metric", "features-reduction", "feature-reduction-dimensions", "empirical-bayes" ]
+        "parameters": ["data_subset", "features_to_harmonize", "site_indicator", "discrete_covariates", "continuous_covariates", "discrete_cluster_features", "continuous_cluster_features", "metric", "features_reduction", "feature_reduction_dimensions", "empirical_bayes" ]
     },
     "relief": {
         "label": "RELIEF",
-        "parameters": ["features-to-harmonize", "covariates", "patient-identifier", "intermediate-results-path" ]
+        "parameters": ["features_to_harmonize", "covariates", "patient_identifier", "intermediate_results_path" ]
     }
 }
 

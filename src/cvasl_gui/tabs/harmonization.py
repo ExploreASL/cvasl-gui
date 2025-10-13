@@ -149,7 +149,7 @@ def create_harmonization_parameters():
         dbc.Row([
             dbc.Col(html.Label("Label", style={"marginTop": "6px"}), width=3),
             dbc.Col(dbc.Input(id="label-input", type="text",
-                placeholder="Enter label...", value="harmonized"),
+                placeholder="Enter label...", value="neurocombat"),
             ),
         ], className="mb-3", id="row-label-input"),
 
@@ -173,9 +173,18 @@ def create_harmonization_parameters():
     Input("algorithm-dropdown", "value"),
 )
 def toggle_rows(algorithm):
+    """Show/hide parameter rows based on the selected algorithm"""
     active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
-
     return [ {"display": "flex"} if id in active_parameters else {"display": "none"} for id in parameters.keys() ]
+
+
+@app.callback(
+    Output("label-input", "value"),
+    Input("algorithm-dropdown", "value"),
+)
+def update_label_from_algorithm(algorithm):
+    """Update the label input to match the selected algorithm name"""
+    return algorithm.lower() if algorithm else "harmonized"
 
 
 #

@@ -6,7 +6,7 @@ import time
 import json
 
 from cvasl.harmonizers import NeuroCombat, NeuroHarmonize, Covbat, NestedComBat, \
-                              ComscanNeuroCombat, AutoCombat, RELIEF, CombatPlusPlus
+                              AutoCombat, RELIEF, CombatPlusPlus
 from cvasl.dataset import MRIdataset, encode_cat_features
 
 
@@ -21,7 +21,6 @@ harmonizers = {
     "neuroharmonize": NeuroHarmonize,
     "covbat": Covbat,
     "nestedcombat": NestedComBat,
-    "comscanneuroharmonize": ComscanNeuroCombat,
     "autocombat": AutoCombat,
     "relief": RELIEF,
     "combatplusplus": CombatPlusPlus

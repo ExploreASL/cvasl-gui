@@ -1,17 +1,17 @@
 parameters = {
     "data-subset": {
         "type": "feature-list-multi",
-        "label": "Data Subset",
+        "label": "Data subset",
         "description": "Features of the dataset subset to be passed to autocombat for harmonization.",
     },
     "features-to-harmonize": {
         "type": "feature-list-multi",
-        "label": "Features To Harmonize",
+        "label": "Features to harmonize",
         "description": "Features to harmonize excluding covariates and site indicator.",
     },
     "batch-list-harmonisations": {
         "type": "feature-list-multi",
-        "label": "Batch List Harmonisations",
+        "label": "Batch list harmonisations",
         "description": "List of batch variables for nested ComBat.",
     },
     "covariates": {
@@ -21,42 +21,42 @@ parameters = {
     },
     "discrete-covariates": {
         "type": "feature-list-multi",
-        "label": "Discrete Covariates",
+        "label": "Discrete covariates",
         "description": "Discrete covariates to control for during harmonization.",
     },
     "continuous-covariates": {
         "type": "feature-list-multi",
-        "label": "Continuous Covariates",
+        "label": "Continuous covariates",
         "description": "Continuous covariates to control for during harmonization.",
     },
     "numerical-covariates": {
         "type": "feature-list-multi",
-        "label": "Numerical Covariates",
+        "label": "Numerical covariates",
         "description": "Numerical covariates for CovBat harmonization.",
     },
     "discrete-covariates-to-remove": {
         "type": "feature-list-multi",
-        "label": "Discrete Covariates To Remove",
+        "label": "Discrete covariates to remove",
         "description": "Discrete covariates to remove with Combat++.",
     },
     "continuous-covariates-to-remove": {
         "type": "feature-list-multi",
-        "label": "Continuous Covariates To Remove",
+        "label": "Continuous covariates to remove",
         "description": "Continuous covariates to remove with Combat++.",
     },
     "smooth-terms": {
         "type": "feature-list-multi",
-        "label": "Smooth Terms",
+        "label": "Smooth terms",
         "description": "Names of columns to include as smooth, nonlinear terms.",
     },
     "discrete-cluster-features": {
         "type": "feature-list-multi",
-        "label": "Discrete Cluster Features",
+        "label": "Discrete cluster features",
         "description": "Target site features which are categorical to one-hot encode for clustering.",
     },
     "continuous-cluster-features": {
         "type": "feature-list-multi",
-        "label": "Continuous Cluster Features",
+        "label": "Continuous cluster features",
         "description": "Target site features which are continuous to scale for clustering.",
     },
     "metric": {
@@ -66,22 +66,22 @@ parameters = {
     },
     "features-reduction": {
         "type": "str",
-        "label": "Features Reduction",
+        "label": "Features reduction",
         "description": "Method for reduction of the embedded space with n_components.",
     },
     "feature-reduction-dimensions": {
         "type": "int",
-        "label": "Feature Reduction Dimensions",
+        "label": "Feature reduction dimensions",
         "description": "Dimension of the embedded space for features reduction.",
     },
     "empirical-bayes": {
         "type": "bool",
-        "label": "Empirical Bayes",
+        "label": "Empirical bayes",
         "description": "Whether to use empirical Bayes estimates of site effects.",
     },
     "mean-only": {
         "type": "bool",
-        "label": "Mean Only",
+        "label": "Mean only",
         "description": "Whether to perform mean-only adjustment.",
     },
     "parametric": {
@@ -91,7 +91,7 @@ parameters = {
     },
     "return-extended": {
         "type": "bool",
-        "label": "Return Extended",
+        "label": "Return extended",
         "description": "Whether to return extended outputs (intermediate dataframes).",
     },
     "use-gmm": {
@@ -101,17 +101,17 @@ parameters = {
     },
     "site-indicator": {
         "type": "feature-list-single",
-        "label": "Site Indicator",
+        "label": "Site indicator",
         "description": "Feature that differentiates different sites.",
     },
     "patient-identifier": {
         "type": "feature-list-single",
-        "label": "Patient Identifier",
+        "label": "Patient identifier",
         "description": "Column name identifying each patient.",
     },
     "intermediate-results-path": {
         "type": "str",
-        "label": "Intermediate Results Path",
+        "label": "Intermediate results path",
         "description": "Path to save intermediate results.",
     },
 }

@@ -85,16 +85,16 @@ def create_parameter_component(parameter_data, width=3):
     match parameter_type:
         case "feature-list-multi":
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
-                                            multi=True, placeholder="Select features..."),
+                                            multi=True, placeholder="select features..."),
         case "feature-list-single":
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
-                                            multi=False, placeholder="Select feature..."),
+                                            multi=False, placeholder="select feature..."),
         case "str":
             parameter_control = dbc.Input(id=f"{id}-input", type="text",
-                                         placeholder="Enter value..."),
+                                         placeholder="enter value..."),
         case "int":
             parameter_control = dbc.Input(id=f"{id}-input", type="number",
-                                         placeholder="Enter integer..."),
+                                         placeholder="enter integer..."),
         case "bool":
             parameter_control = dbc.Checkbox(id=f"{id}-checkbox", value=False,
                                              style={"marginTop": "6px"}),
@@ -173,9 +173,9 @@ def create_harmonization_parameters():
     Input("algorithm-dropdown", "value"),
 )
 def toggle_rows(algorithm):
-    visible = ALGORITHM_PARAMS.get(algorithm, [])
+    active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
 
-    return [ {"display": "flex"} if id in visible else {"display": "none"} for id in parameters.keys() ]
+    return [ {"display": "flex"} if id in active_parameters else {"display": "none"} for id in parameters.keys() ]
 
 
 #

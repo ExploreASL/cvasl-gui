@@ -50,9 +50,10 @@ parameters = {
         "description": "Target site features which are continuous to scale for clustering.",
     },
     "metric": {
-        "type": "str",
+        "type": "selection",
         "label": "Metric",
         "description": "Metric to define the optimal number of clusters.",
+        "options": ["distortion", "silhouette", "calinski_harabasz"]
     },
     "features_reduction": {
         "type": "str",
@@ -68,26 +69,31 @@ parameters = {
         "type": "bool",
         "label": "Empirical bayes",
         "description": "Whether to use empirical Bayes estimates of site effects.",
+        "default": True,
     },
     "mean_only": {
         "type": "bool",
         "label": "Mean only",
         "description": "Whether to perform mean-only adjustment.",
+        "default": False,
     },
     "parametric": {
         "type": "bool",
         "label": "Parametric",
         "description": "Whether to use parametric adjustments.",
+        "default": True,
     },
     "return_extended": {
         "type": "bool",
         "label": "Return extended",
         "description": "Whether to return extended outputs (intermediate dataframes).",
+        "default": False,
     },
     "use_gmm": {
         "type": "bool",
         "label": "Use GMM",
         "description": "Whether to use Gaussian Mixture Model (GMM) for grouping.",
+        "default": True,
     },
     "site_indicator": {
         "type": "feature-list-single",

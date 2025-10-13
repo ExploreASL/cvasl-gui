@@ -79,6 +79,7 @@ def create_parameter_component(parameter_data, width=3):
     label_text = parameter_data[1]["label"]
     parameter_type = parameter_data[1]["type"]
     description = parameter_data[1].get("description", "")
+    default_value = parameter_data[1].get("default", None)
 
     # Depending on the type, create the appropriate input component
     parameter_control = None
@@ -89,6 +90,11 @@ def create_parameter_component(parameter_data, width=3):
         case "feature-list-single":
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
                                             multi=False, placeholder="select feature..."),
+        case "selection":
+            options = parameter_data[1].get("options", [])
+            parameter_control = dcc.Dropdown(id=f"{id}-dropdown", 
+                                            options=[{"label": opt, "value": opt} for opt in options],
+                                            multi=False, placeholder="select option..."),
         case "str":
             parameter_control = dbc.Input(id=f"{id}-input", type="text",
                                          placeholder="enter value..."),
@@ -96,7 +102,8 @@ def create_parameter_component(parameter_data, width=3):
             parameter_control = dbc.Input(id=f"{id}-input", type="number",
                                          placeholder="enter integer..."),
         case "bool":
-            parameter_control = dbc.Checkbox(id=f"{id}-checkbox", value=False,
+            bool_default = default_value if default_value is not None else False
+            parameter_control = dbc.Checkbox(id=f"{id}-checkbox", value=bool_default,
                                              style={"marginTop": "6px"}),
 
     return dbc.Row([
@@ -329,10 +336,10 @@ def update_continuous_cluster_features_dropdown(data):
     Output("harmonization-status-interval", "disabled", allow_duplicate=True),
     Input("start-button", "n_clicks"),
     State("algorithm-dropdown", "value"),
-    State("features-to-harmonize-dropdown", "value"),
-    State("discrete-covariates-dropdown", "value"),
-    State("continuous-covariates-dropdown", "value"),
-    State("site-indicator-dropdown", "value"),
+    State("features_to_harmonize-dropdown", "value"),
+    State("discrete_covariates-dropdown", "value"),
+    State("continuous_covariates-dropdown", "value"),
+    State("site_indicator-dropdown", "value"),
     State("label-input", "value"),
     prevent_initial_call=True
 )

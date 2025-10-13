@@ -34,16 +34,6 @@ parameters = {
         "label": "Numerical covariates",
         "description": "Numerical covariates for CovBat harmonization.",
     },
-    "discrete-covariates-to-remove": {
-        "type": "feature-list-multi",
-        "label": "Discrete covariates to remove",
-        "description": "Discrete covariates to remove with Combat++.",
-    },
-    "continuous-covariates-to-remove": {
-        "type": "feature-list-multi",
-        "label": "Continuous covariates to remove",
-        "description": "Continuous covariates to remove with Combat++.",
-    },
     "smooth-terms": {
         "type": "feature-list-multi",
         "label": "Smooth terms",

@@ -2,11 +2,10 @@ import sys
 import os
 import traceback
 import zipfile
-import time
 import json
 
 from cvasl.harmonizers import NeuroCombat, NeuroHarmonize, Covbat, NestedComBat, \
-                              AutoCombat, RELIEF, CombatPlusPlus
+                              AutoCombat, RELIEF
 from cvasl.dataset import MRIdataset, encode_cat_features
 
 
@@ -22,8 +21,7 @@ harmonizers = {
     "covbat": Covbat,
     "nestedcombat": NestedComBat,
     "autocombat": AutoCombat,
-    "relief": RELIEF,
-    "combatplusplus": CombatPlusPlus
+    "relief": RELIEF
 }
 
 def write_job_status(job_id: str, status: str) -> None:

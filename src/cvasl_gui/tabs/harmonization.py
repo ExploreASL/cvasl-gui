@@ -25,9 +25,7 @@ ALGORITHM_PARAMS = {
         "covbat": ["features-to-harmonize", "covariates", "site-indicator", "patient-identifier", "numerical-covariates", "empirical-bayes" ],
         "neurocombat": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "site-indicator", "patient-identifier", "empirical-bayes", "mean-only", "parametric" ],
         "nestedcombat": ["features-to-harmonize", "batch-list-harmonisations", "site-indicator", "discrete-covariates", "continuous-covariates", "intermediate-results-path", "patient-identifier", "return-extended", "use-gmm" ],
-        "comscanneurocombat": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "site-indicator", "empirical-bayes", "parametric", "mean-only" ],
         "autocombat": ["data-subset", "features-to-harmonize", "site-indicator", "discrete-covariates", "continuous-covariates", "discrete-cluster-features", "continuous-cluster-features", "metric", "features-reduction", "feature-reduction-dimensions", "empirical-bayes" ],
-        "combatplusplus": ["features-to-harmonize", "discrete-covariates", "continuous-covariates", "discrete-covariates-to-remove", "continuous-covariates-to-remove", "patient-identifier", "intermediate-results-path", "site-indicator" ],
         "relief": ["features-to-harmonize", "covariates", "patient-identifier", "intermediate-results-path" ]
 }
 

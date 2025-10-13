@@ -116,6 +116,6 @@ parameters = {
         "type": "feature-list-multi",
         "label": "Data subset",
         "description": "Features of the dataset subset to be passed to autocombat for harmonization.",
-        "hide": True
+        "hide": True,
     },
 }

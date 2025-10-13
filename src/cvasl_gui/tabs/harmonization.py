@@ -197,9 +197,21 @@ def create_harmonization_parameters():
     Input("algorithm-dropdown", "value"),
 )
 def toggle_rows(algorithm):
-    """Show/hide parameter rows based on the selected algorithm"""
+    """Show/hide parameter rows based on the selected algorithm and hide property"""
     active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
-    return [ {"display": "flex"} if id in active_parameters else {"display": "none"} for id in parameters.keys() ]
+    
+    styles = []
+    for param_id in parameters.keys():
+        # Check if parameter should be hidden
+        should_hide = parameters[param_id].get("hide", False)
+        
+        # Show if it's active for the algorithm and not marked as hidden
+        if param_id in active_parameters and not should_hide:
+            styles.append({"display": "flex"})
+        else:
+            styles.append({"display": "none"})
+    
+    return styles
 
 
 @app.callback(

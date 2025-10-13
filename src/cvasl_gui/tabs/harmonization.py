@@ -129,7 +129,7 @@ def create_harmonization_parameters():
 
     return [
         dbc.Row([
-            dbc.Col(html.Label("Algorithm:", style={"marginTop": "6px"}), width=3),
+            dbc.Col(html.Label("Algorithm", style={"marginTop": "6px"}), width=3),
             dbc.Col(
                 dcc.Dropdown(
                     id="algorithm-dropdown",
@@ -147,7 +147,7 @@ def create_harmonization_parameters():
         *[create_parameter_component(parameter_data) for parameter_data in parameters.items()],
 
         dbc.Row([
-            dbc.Col(html.Label("Label:", style={"marginTop": "6px"}), width=3),
+            dbc.Col(html.Label("Label", style={"marginTop": "6px"}), width=3),
             dbc.Col(dbc.Input(id="label-input", type="text",
                 placeholder="Enter label...", value="harmonized"),
             ),
@@ -183,7 +183,7 @@ def toggle_rows(algorithm):
 #
 
 @app.callback(
-    Output("data-subset-dropdown", "options"),
+    Output("data_subset-dropdown", "options"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -193,7 +193,7 @@ def update_data_subset_dropdown(data):
     return [{"label": col, "value": col} for col in data[0].keys()]
 
 @app.callback(
-    Output("features-to-harmonize-dropdown", "options"),
+    Output("features_to_harmonize-dropdown", "options"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -203,8 +203,8 @@ def update_feature_dropdown(data):
     return [{"label": col, "value": col} for col in data[0].keys()]
 
 @app.callback(
-    Output("discrete-covariates-dropdown", "options"),
-    Output("discrete-covariates-dropdown", "value"),
+    Output("discrete_covariates-dropdown", "options"),
+    Output("discrete_covariates-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -216,8 +216,8 @@ def update_discrete_covariate_dropdown(data):
     return options, default_value
 
 @app.callback(
-    Output("continuous-covariates-dropdown", "options"),
-    Output("continuous-covariates-dropdown", "value"),
+    Output("continuous_covariates-dropdown", "options"),
+    Output("continuous_covariates-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -229,8 +229,8 @@ def update_continuous_covariate_dropdown(data):
     return options, default_value
 
 @app.callback(
-    Output("site-indicator-dropdown", "options"),
-    Output("site-indicator-dropdown", "value"),
+    Output("site_indicator-dropdown", "options"),
+    Output("site_indicator-dropdown", "value"),
     Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
     prevent_initial_call=True
 )
@@ -241,6 +241,78 @@ def update_site_indicator_dropdown(data):
     default_value = "Site" if "Site" in data[0].keys() else None
     return options, default_value
 
+@app.callback(
+    Output("patient_identifier-dropdown", "options"),
+    Output("patient_identifier-dropdown", "value"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_patient_identifier_dropdown(data):
+    if not data:
+        return [], None
+    options = [{"label": col, "value": col} for col in data[0].keys()]
+    default_value = "participant_id" if "participant_id" in data[0].keys() else None
+    return options, default_value
+
+@app.callback(
+    Output("covariates-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_covariates_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("batch_list_harmonisations-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_batch_list_harmonisations_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("numerical_covariates-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_numerical_covariates_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("smooth_terms-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_smooth_terms_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("discrete_cluster_features-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_discrete_cluster_features_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
+
+@app.callback(
+    Output("continuous_cluster_features-dropdown", "options"),
+    Input({'type': 'data-table', 'index': 'harmonization'}, "data"),
+    prevent_initial_call=True
+)
+def update_continuous_cluster_features_dropdown(data):
+    if not data:
+        return []
+    return [{"label": col, "value": col} for col in data[0].keys()]
 
 
 @app.callback(

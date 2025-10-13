@@ -353,29 +353,80 @@ def update_continuous_cluster_features_dropdown(data):
     Output("harmonization-status-interval", "disabled", allow_duplicate=True),
     Input("start-button", "n_clicks"),
     State("algorithm-dropdown", "value"),
+    State("label-input", "value"),
+    # Add all parameter controls as State
+    State("data_subset-dropdown", "value"),
     State("features_to_harmonize-dropdown", "value"),
+    State("batch_list_harmonisations-dropdown", "value"),
+    State("covariates-dropdown", "value"),
     State("discrete_covariates-dropdown", "value"),
     State("continuous_covariates-dropdown", "value"),
+    State("numerical_covariates-dropdown", "value"),
+    State("smooth_terms-dropdown", "value"),
+    State("discrete_cluster_features-dropdown", "value"),
+    State("continuous_cluster_features-dropdown", "value"),
+    State("metric-dropdown", "value"),
+    State("features_reduction-dropdown", "value"),
+    State("feature_reduction_dimensions-input", "value"),
+    State("empirical_bayes-checkbox", "value"),
+    State("mean_only-checkbox", "value"),
+    State("parametric-checkbox", "value"),
+    State("return_extended-checkbox", "value"),
+    State("use_gmm-checkbox", "value"),
     State("site_indicator-dropdown", "value"),
-    State("label-input", "value"),
+    State("patient_identifier-dropdown", "value"),
+    State("intermediate_results_path-input", "value"),
     prevent_initial_call=True
 )
-def start_job(n_clicks, algorithm, selected_features, discrete_covariate_features, continuous_covariate_features, 
-              site_indicator, label):
-    if not selected_features:
+def start_job(n_clicks, algorithm, label, 
+              data_subset, features_to_harmonize, batch_list_harmonisations, covariates,
+              discrete_covariates, continuous_covariates, numerical_covariates, smooth_terms,
+              discrete_cluster_features, continuous_cluster_features, metric, features_reduction,
+              feature_reduction_dimensions, empirical_bayes, mean_only, parametric, 
+              return_extended, use_gmm, site_indicator, patient_identifier, intermediate_results_path):
+    
+    if not features_to_harmonize:
         return dash.no_update, True
+    
+    # Get active parameters for the selected algorithm
+    active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
+    
+    # Map parameter names to their values
+    param_values = {
+        "data_subset": data_subset,
+        "features_to_harmonize": features_to_harmonize,
+        "batch_list_harmonisations": batch_list_harmonisations,
+        "covariates": covariates,
+        "discrete_covariates": discrete_covariates,
+        "continuous_covariates": continuous_covariates,
+        "numerical_covariates": numerical_covariates,
+        "smooth_terms": smooth_terms,
+        "discrete_cluster_features": discrete_cluster_features,
+        "continuous_cluster_features": continuous_cluster_features,
+        "metric": metric,
+        "features_reduction": features_reduction,
+        "feature_reduction_dimensions": feature_reduction_dimensions,
+        "empirical_bayes": empirical_bayes,
+        "mean_only": mean_only,
+        "parametric": parametric,
+        "return_extended": return_extended,
+        "use_gmm": use_gmm,
+        "site_indicator": site_indicator,
+        "patient_identifier": patient_identifier,
+        "intermediate_results_path": intermediate_results_path,
+    }
+    
+    # Build parameters dict with only active parameters that have values
+    job_parameters = {}
+    for param in active_parameters:
+        if param in param_values and param_values[param] is not None:
+            job_parameters[param] = param_values[param]
 
     job_arguments = {
         "algorithm": algorithm,
         "input_paths": data_store.input_files['harmonization'],
         "input_sites": data_store.input_sites['harmonization'],
-        "parameters": {
-            "features_to_harmonize": selected_features,
-            "discrete_covariates": discrete_covariate_features,
-            "continuous_covariates": continuous_covariate_features,
-            "site_indicator": site_indicator,
-            "patient_identifier": 'participant_id'
-        },
+        "parameters": job_parameters,
         "label": label,
     }
 

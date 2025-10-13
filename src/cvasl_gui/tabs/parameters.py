@@ -55,7 +55,7 @@ parameters = {
         "type": "selection",
         "label": "Features reduction",
         "description": "Method for reducing the embedded space with n components. Can be None, 'pca' or 'umap'.",
-        "options": [None, "pca", "umap"],
+        "options": ["None", "pca", "umap"],
     },
     "feature_reduction_dimensions": {
         "type": "int",

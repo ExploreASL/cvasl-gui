@@ -17,6 +17,8 @@ cvasl = "^0.1.5"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
+pytest = "^8.3.4"
+pytest-cov = "^4.0.0"
 
 [tool.poetry.scripts]
 cvasl-gui = "cvasl_gui.index:main"

@@ -48,12 +48,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install poetry
-        poetry install
+        poetry install --with dev
 
     # Testing and checking
-    # - name: Test with pytest
-    #   run: |
-    #     poetry run pytest
+    - name: Test with pytest
+      run: |
+        poetry run pytest
     # - name: Type check
     #   run: |
     #     poetry run pytype .

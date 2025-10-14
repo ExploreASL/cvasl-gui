@@ -92,17 +92,20 @@ parameters = {
         "type": "feature-list-single",
         "label": "Site indicator",
         "description": "The site identifier.",
+        "default": "site",
     },
     "patient_identifier": {
         "type": "feature-list-single",
         "label": "Patient identifier",
         "description": "Column name identifying each patient.",
+        "default": "participant_id",
         "hide": True,
     },
     "intermediate_results_path": {
         "type": "str",
         "label": "Intermediate results path",
         "description": "Path to save intermediate results.",
+        "default": ".",
         "hide": True,
     },
     "return_extended": {

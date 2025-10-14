@@ -86,21 +86,26 @@ def create_parameter_component(parameter_data, width=3):
     match parameter_type:
         case "feature-list-multi":
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
-                                            multi=True, placeholder="select features..."),
+                                            multi=True, placeholder="select features...",
+                                            value=default_value),
         case "feature-list-single":
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", options=[],
-                                            multi=False, placeholder="select feature..."),
+                                            multi=False, placeholder="select feature...",
+                                            value=default_value),
         case "selection":
             options = parameter_data[1].get("options", [])
             parameter_control = dcc.Dropdown(id=f"{id}-dropdown", 
                                             options=[{"label": opt, "value": opt} for opt in options],
-                                            multi=False, placeholder="select option..."),
+                                            multi=False, placeholder="select option...",
+                                            value=default_value),
         case "str":
             parameter_control = dbc.Input(id=f"{id}-input", type="text",
-                                         placeholder="enter value..."),
+                                         placeholder="enter value...",
+                                         value=default_value),
         case "int":
             parameter_control = dbc.Input(id=f"{id}-input", type="number",
-                                         placeholder="enter integer..."),
+                                         placeholder="enter integer...",
+                                         value=default_value),
         case "bool":
             bool_default = default_value if default_value is not None else False
             parameter_control = dbc.Checkbox(id=f"{id}-checkbox", value=bool_default,

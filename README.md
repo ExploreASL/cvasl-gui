@@ -21,7 +21,7 @@ This GUI supports the ongoing research at University of Amsterdam Medical Center
 
 **AutoComBat:** Carré, A. et al. AutoComBat: a generic method for harmonizing MRI-based radiomic features. *Sci. Rep.* 12, 12762 (2022).
 
-**RELIEF:** Zhang, R., Oliver, L. D., Voineskos, A. N. & Park, J. Y. RELIEF: A structured multivariate approach for removal of latent inter-scanner effects. *Imaging Neurosci (Camb)* 1, 1–16 (2023).l-gui is an open source collaborative Python GUI, built around the CVASL package, for statistical harmonisation of (arterial spin labelling) MRI-derived data and prediction of brain age using shallow machine learning.
+**RELIEF:** Zhang, R., Oliver, L. D., Voineskos, A. N. & Park, J. Y. RELIEF: A structured multivariate approach for removal of latent inter-scanner effects. *Imaging Neurosci (Camb)* 1, 1–16 (2023).
 
 ## Install and run
 

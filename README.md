@@ -1,6 +1,6 @@
 # CVASL-GUI
 
-Cvasl-gui is an open source collaborative Python GUI, built around the CVASL package, for statistical harmonisation of (arterial spin labelling) MRI-derived data and prediction of brain age using shallow machine learning.
+Cvasl-gui is an open source collaborative Python GUI, built around the CVASL package, for statistical harmonisation of (arterial spin labelling) MRI-derived data and prediction of brain age using shallow machine learning, utilised in 'Multi-cohort, multi-sequence harmonisation for cerebrovascular brain age', https://doi.org/10.1162/IMAG.a.964.
 
 Statistical harmonisation methods include NeuroComBat, CovBat, NeuroHarmonize, OPNested ComBat, AutoComBat, and RELIEF.
 Shallow machine learning methods include: ...TODO

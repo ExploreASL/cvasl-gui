@@ -1,4 +1,5 @@
 import os
+import sys
 import webbrowser
 from threading import Timer
 from waitress import serve
@@ -64,7 +65,10 @@ def display_content(selected_tab):
 
 def main():
     port = int(os.getenv('CVASL_PORT', 8767))
-    debug_mode = os.getenv('CVASL_DEBUG_MODE', 'False') == 'True'
+    # Detect if running as PyInstaller bundle
+    is_frozen = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+    # Force production mode for PyInstaller builds
+    debug_mode = False if is_frozen else os.getenv('CVASL_DEBUG_MODE', 'False') == 'True'
     path = os.getenv('CVASL_PATHNAME_PREFIX', '/')
     host = '127.0.0.1'
 

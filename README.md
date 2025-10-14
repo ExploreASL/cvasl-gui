@@ -45,3 +45,40 @@ CVASL_PORT        # The port the server runs on, default is 8767
 poetry install
 poetry run cvasl-gui
 ```
+
+### Tests
+
+#TODO
+
+### Building Executable with PyInstaller
+
+To create a standalone executable of the application:
+
+1. Install PyInstaller (already included in dev dependencies):
+```bash
+poetry install
+```
+
+2. Build the executable using the provided script:
+```bash
+./build.sh
+```
+
+Or manually:
+```bash
+poetry run pyinstaller cvasl-gui.spec
+```
+
+3. The executable will be created in `dist/cvasl-gui/`. Run it with:
+```bash
+cd dist/cvasl-gui
+./cvasl-gui
+```
+
+**Note:** The build process will:
+- Include all necessary assets (CSS files, etc.)
+- Bundle Python dependencies
+- Create a self-contained application directory
+- The executable can be distributed to users without requiring Python installation
+
+**Environment Variables:** The executable supports some of the environment variables as the regular installation (`CVASL_DEBUG_MODE` is forced to False).

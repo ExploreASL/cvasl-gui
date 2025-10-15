@@ -86,7 +86,7 @@ parameters = {
         "type": "bool",
         "label": "Use GMM",
         "description": "Select to use Gaussian Mixture Modeling (GMM) to identify scan groupings associated with hidden covariates to better address bimodal feature distributions. Off by default.",
-        "default": True,
+        "default": False,
     },
     "site_indicator": {
         "type": "feature-list-single",

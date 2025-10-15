@@ -20,7 +20,8 @@ def create_data_table(instance_id):
         sort_action='native',
         sort_mode='multi',
         page_action='native',
-        page_size=20
+        page_size=20,
+        style_table={'overflowX': 'auto'}
     )
 
 @app.callback(

@@ -406,7 +406,7 @@ def start_job(n_clicks, algorithm, label,
         return dash.no_update, True
     
     # Get active parameters for the selected algorithm
-    active_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
+    algorithm_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
     
     # Map parameter names to their values
     param_values = {
@@ -435,9 +435,18 @@ def start_job(n_clicks, algorithm, label,
     
     # Build parameters dict with only active parameters that have values
     job_parameters = {}
-    for param in active_parameters:
-        if param in param_values and param_values[param] is not None:
-            job_parameters[param] = param_values[param]
+    for param in algorithm_parameters:
+        if param in param_values:
+            value = param_values[param]
+            param_type = parameters[param].get("type")
+            if param_type == "feature-list-multi" and value is None:
+                value = []
+            if value is None:
+                continue  # Skip parameters without a value
+            # Beyond this point, None is considered a valid value
+            if param_type == "selection" and value == "None":
+                value = None
+            job_parameters[param] = value
 
     job_arguments = {
         "algorithm": algorithm,

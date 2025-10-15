@@ -37,6 +37,10 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
     job_folder = os.path.join(JOBS_DIR, job_id)
     os.makedirs(job_folder, exist_ok=True)
 
+    # Set the intermediate results path to the job's directory
+    if "intermediate_results_path" in job_arguments["parameters"]:
+        job_arguments["parameters"]["intermediate_results_path"] = job_folder
+
     # Save job arguments
     with open(os.path.join(job_folder, "job_arguments.json"), "w") as f:
         json.dump(job_arguments, f)

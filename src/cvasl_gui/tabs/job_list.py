@@ -273,8 +273,8 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
     table_header = html.Tr([
         html.Th("Start time"),
         html.Th("Type"),
-        html.Th("Algorithm/Model"),
-        html.Th("Inputs"),
+        html.Th("Algorithm / Model"),
+        html.Th("Arguments"),
         html.Th("Status"),
         html.Th("Actions")
     ])
@@ -300,26 +300,29 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
         if job.get("error_log") and job.get("status") == "failed":
             # Show a collapsible error details
             status_content = html.Div([
-                html.Span("failed", style={"color": "red", "font-weight": "bold"}),
+                html.Span("failed", style={"color": "red"}),
                 html.Details([
-                    html.Summary("Show error details", style={"cursor": "pointer", "color": "blue"}),
+                    html.Summary("Show error details", style={"cursor": "pointer", "marginTop": "5px", "fontSize": "12px", "color": "#6c757d"}),
                     html.Pre(job["error_log"], style={
-                        "background": "#f5f5f5", 
-                        "padding": "10px", 
-                        "border": "1px solid #ddd",
-                        "max-height": "200px",
+                        "background": "#f8f9fa",
+                        "padding": "10px",
+                        "border": "1px solid #dee2e6",
+                        "borderRadius": "4px",
+                        "maxHeight": "300px",
                         "overflow": "auto",
-                        "white-space": "pre-wrap",
-                        "font-size": "12px"
+                        "whiteSpace": "pre-wrap",
+                        "fontSize": "12px",
+                        "marginTop": "5px",
+                        "color": "#212529"
                     })
                 ])
             ])
         elif job.get("status") == "failed":
-            status_content = html.Span("failed", style={"color": "red", "font-weight": "bold"})
+            status_content = html.Span("failed", style={"color": "red"})
         elif job.get("status") == "completed":
-            status_content = html.Span("completed", style={"color": "green", "font-weight": "bold"})
+            status_content = html.Span("completed", style={"color": "green"})
         elif job.get("running"):
-            status_content = html.Span("running", style={"color": "blue", "font-weight": "bold"})
+            status_content = html.Span("running", style={"color": "blue"})
         
         # Create actions cell
         actions = []
@@ -330,11 +333,32 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
         if not job.get("running", False):
             actions.append(html.Button("Remove", id={"type": "remove-job", "index": job["id"]}, n_clicks=0, style={"margin-right": "5px"}))
         
+        # Create inputs cell with collapsible arguments
+        input_paths = job_args.get("input_paths", [])
+        inputs_display = html.Div([
+            html.Div(", ".join([os.path.basename(p) for p in input_paths]) if input_paths else "N/A"),
+            html.Details([
+                html.Summary("Show all arguments", style={"cursor": "pointer", "marginTop": "5px", "fontSize": "12px", "color": "#6c757d"}),
+                html.Pre(json.dumps(job_args, indent=2), style={
+                    "background": "#f8f9fa",
+                    "padding": "10px",
+                    "border": "1px solid #dee2e6",
+                    "borderRadius": "4px",
+                    "maxHeight": "300px",
+                    "overflow": "auto",
+                    "whiteSpace": "pre-wrap",
+                    "fontSize": "12px",
+                    "marginTop": "5px",
+                    "color": "#212529"
+                })
+            ])
+        ])
+        
         table_rows.append(html.Tr([
             html.Td(job.get("start_time", "")),
             html.Td(job_type.capitalize()),
             html.Td(algorithm),
-            html.Td(", ".join(job.get("arguments", {}).get("input_paths", []))),
+            html.Td(inputs_display),
             html.Td(status_content),
             html.Td(actions)
         ]))

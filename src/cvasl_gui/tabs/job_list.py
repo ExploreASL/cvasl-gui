@@ -339,7 +339,18 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
             html.Td(actions)
         ]))
 
-    return html.Table([table_header] + table_rows, style={"width": "100%"})
+    table_style = {
+        "width": "100%",
+        "border-collapse": "collapse",
+        "font-size": "18px",
+        "box-shadow": "0 1px 3px rgba(0,0,0,0.1)"
+    }
+    
+    return html.Table(
+        [table_header] + table_rows,
+        style=table_style,
+        className="job-table"
+    )
 
 
 @app.callback(

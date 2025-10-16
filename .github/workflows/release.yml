@@ -36,15 +36,17 @@ jobs:
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install build setuptools-scm poetry-setuptools-scm-plugin
+        python -m pip install poetry
+        poetry self add "poetry-dynamic-versioning[plugin]"
     
     - name: Check version detection
       run: |
-        python -m setuptools_scm
+        poetry-dynamic-versioning
+        poetry version
         echo "Expected version from tag: ${GITHUB_REF#refs/tags/v}"
     
     - name: Build package
-      run: python -m build
+      run: poetry build
     
     - name: Check distribution packages
       run: |

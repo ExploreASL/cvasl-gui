@@ -151,8 +151,8 @@ def start_job(n_clicks, model_name, selected_features, label):
         "label": label,
     }
 
-    # Generate job_id or receive from run_job
-    job_id = str(int(time.time()))
+    # Generate job_id and start the job in a separate thread
+    job_id = str(int(time.time())) + "_" + model_name
     threading.Thread(target=run_job, args=(job_arguments, job_id, False), daemon=True).start()
 
     return job_id, False  # enable the interval

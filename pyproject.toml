@@ -13,7 +13,7 @@ pandas = "^2.2.3"
 python-dotenv = "^1.0.1"
 waitress = "^3.0.2"
 dash-bootstrap-components = "1.7.1"
-cvasl = "^0.1.7"
+cvasl = "^0.1.8"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

@@ -7,12 +7,12 @@ import json
 import threading
 
 from cvasl_gui.app import app
-from cvasl_gui.components.job_list import run_job
+from cvasl_gui.tabs.job_list import run_job
 from cvasl_gui import data_store
 from cvasl_gui.components.directory_input import create_directory_input
 from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare2 import create_feature_compare
-from cvasl_gui.components.job_list import create_job_list, get_job_status
+from cvasl_gui.tabs.job_list import create_job_list, get_job_status
 
 from cvasl_gui.jobs.prediction_job import prediction_models
 
@@ -38,8 +38,6 @@ def create_tab_prediction():
                 title="Feature comparison"),
             dbc.AccordionItem(create_prediction_parameters(),
                 title="Prediction"),
-            # dbc.AccordionItem([create_job_list()],
-            #     title="Runs"),
             dcc.Store(id="prediction-job-id", data=None),
         ], always_open=True)
     ])

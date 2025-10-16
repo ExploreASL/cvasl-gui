@@ -12,6 +12,7 @@ from cvasl_gui import data_store
 from cvasl_gui.app import app
 from cvasl_gui.tabs.harmonization import create_tab_harmonization
 from cvasl_gui.tabs.prediction import create_tab_prediction
+from cvasl_gui.tabs.job_list import create_job_list
 
 data_store.all_data = {
   'harmonization': None,
@@ -39,6 +40,12 @@ app.layout = html.Div(
                     style={'backgroundColor': '#f0f0f0'},  # Default tab background
                     selected_style={'backgroundColor': '#e7f1ff', 'fontWeight': 'bold'}  # Active tab style
                 ),
+                dcc.Tab(
+                    label='Jobs',
+                    value='3',
+                    style={'backgroundColor': '#f0f0f0'},  # Default tab background
+                    selected_style={'backgroundColor': '#e7f1ff', 'fontWeight': 'bold'}  # Active tab style
+                ),
             ],
             vertical=False
         ),
@@ -47,6 +54,7 @@ app.layout = html.Div(
             [
                 html.Div(create_tab_harmonization(), id='tab-1-content', style={'display': 'none'}),
                 html.Div(create_tab_prediction(), id='tab-2-content', style={'display': 'none'}),
+                html.Div(create_job_list(), id='tab-3-content', style={'display': 'none'}),
             ],
             id='tab-content-container'
         )
@@ -55,12 +63,12 @@ app.layout = html.Div(
 
 # Callback to toggle visibility based on selected tab
 @app.callback(
-    [Output(f'tab-{i}-content', 'style') for i in range(1, 3)],
+    [Output(f'tab-{i}-content', 'style') for i in range(1, 4)],
     [Input('tabs', 'value')]
 )
 def display_content(selected_tab):
     # Set 'display' to 'block' for the selected tab and 'none' for others
-    return [{'display': 'block' if selected_tab == str(i) else 'none'} for i in range(1, 3)]
+    return [{'display': 'block' if selected_tab == str(i) else 'none'} for i in range(1, 4)]
 
 
 def main():

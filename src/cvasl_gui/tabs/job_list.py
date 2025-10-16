@@ -322,8 +322,8 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
             html.Td(status_content),
             html.Td(actions)
         ]))
-    
-    return html.Table([table_header] + table_rows, style={"width": "100%", "border": "1px solid black"})
+
+    return html.Table([table_header] + table_rows, style={"width": "100%"})
 
 
 @app.callback(

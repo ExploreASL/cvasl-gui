@@ -6,12 +6,11 @@ import os
 import threading
 
 from cvasl_gui.app import app
-from cvasl_gui.components.job_list import run_job
+from cvasl_gui.tabs.job_list import run_job, get_job_status
 from cvasl_gui import data_store
 from cvasl_gui.components.directory_input import create_directory_input
 from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare import create_feature_compare
-from cvasl_gui.components.job_list import create_job_list, get_job_status
 
 from cvasl_gui.tabs.parameters import parameters
 
@@ -67,8 +66,6 @@ def create_tab_harmonization():
                 title="Feature comparison"),
             dbc.AccordionItem(create_harmonization_parameters(),
                 title="Harmonization"),
-            dbc.AccordionItem([create_job_list()],
-                title="Runs"),
             dcc.Store(id="harmonization-job-id", data=None),
         ], always_open=True)
     ])

@@ -65,6 +65,7 @@ def run_harmonization() -> None:
 
     print("Running harmonization")
     print("Input paths:", input_paths)
+    print("Parameters:", harmonization_parameters)
 
     # Create the datasets
     mri_datasets = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=[])
@@ -76,7 +77,6 @@ def run_harmonization() -> None:
 
     # Instantiate the correct harmonizer
     harmonizer_class = harmonizers.get(job_arguments["algorithm"])
-    print("Parameters:", harmonization_parameters)
     harmonizer = harmonizer_class(**harmonization_parameters)
 
     # Perform the harmonization

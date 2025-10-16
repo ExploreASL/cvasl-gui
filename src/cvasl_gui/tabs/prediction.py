@@ -135,17 +135,19 @@ def update_feature_dropdown(data):
     State("prediction-label-input", "value"),
     prevent_initial_call=True,
 )
-def start_job(n_clicks, model, selected_features, label):
+def start_job(n_clicks, model_name, selected_features, label):
     if not selected_features:
         return dash.no_update, True
 
     job_arguments = {
+        "model_name": model_name,
         "train_paths": data_store.input_files['prediction-training'],
         "train_sites": data_store.input_sites['prediction-training'],
         "validation_paths": data_store.input_files['prediction-testing'],
         "validation_sites": data_store.input_sites['prediction-testing'],
-        "model": model,
-        "prediction_features": selected_features,
+        "parameters": {
+            "prediction_features": selected_features,
+        },
         "label": label,
     }
 

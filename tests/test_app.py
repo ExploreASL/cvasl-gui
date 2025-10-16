@@ -42,7 +42,7 @@ def test_components_import():
     """Test that component modules can be imported"""
     from cvasl_gui.components import data_table
     from cvasl_gui.components import directory_input
-    from cvasl_gui.components import job_list
+    from cvasl_gui.tabs import job_list
     
     assert data_table is not None
     assert directory_input is not None

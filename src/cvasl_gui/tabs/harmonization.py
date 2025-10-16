@@ -402,9 +402,6 @@ def start_job(n_clicks, algorithm, label,
     if not features_to_harmonize:
         return dash.no_update, True
     
-    # Get active parameters for the selected algorithm
-    algorithm_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
-    
     # Map parameter names to their values
     param_values = {
         "data_subset": data_subset,
@@ -429,7 +426,17 @@ def start_job(n_clicks, algorithm, label,
         "patient_identifier": patient_identifier,
         "intermediate_results_path": intermediate_results_path,
     }
-    
+
+    if algorithm == "autocombat":
+        # Create a data_subset that consists of the features, covariates and site indicators concatenated
+        combined_subset = set(features_to_harmonize or []) | set(discrete_covariates or []) | \
+                set(continuous_covariates or []) | set(discrete_cluster_features or []) | \
+                set(continuous_cluster_features or []) | set([site_indicator] if site_indicator else [])
+        param_values["data_subset"] = list(combined_subset)
+
+    # Get active parameters for the selected algorithm
+    algorithm_parameters = ALGORITHM_PARAMS.get(algorithm, {}).get("parameters", [])
+
     # Build parameters dict with only active parameters that have values
     job_parameters = {}
     for param in algorithm_parameters:

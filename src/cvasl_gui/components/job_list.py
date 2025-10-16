@@ -75,8 +75,8 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
 
         print(f"Process poll result: {poll_result}")
         
-        if poll_result is not None:
-            # Process has already exited - this indicates a startup error
+        if poll_result is not None and poll_result != 0:
+            # Process has already exited with non-zero code - this indicates a startup error
             error_msg = f"Process failed to start (exit code {poll_result})\n"
             
             # Read stderr and stdout from files if they exist
@@ -103,6 +103,9 @@ def run_job(job_arguments: dict, job_id: str, is_harmonization: bool = True):
                 f.write("failed")
             
             print(f"Job {job_id} failed to start: {error_msg}")
+        elif poll_result == 0:
+            # Process completed successfully very quickly
+            print(f"Job {job_id} completed successfully")
             
         # Save job details (so it can be monitored)
         job_details = {

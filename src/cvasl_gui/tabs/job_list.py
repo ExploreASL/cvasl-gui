@@ -272,6 +272,8 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
 
     table_header = html.Tr([
         html.Th("Start time"),
+        html.Th("Type"),
+        html.Th("Algorithm/Model"),
         html.Th("Inputs"),
         html.Th("Status"),
         html.Th("Actions")
@@ -281,6 +283,18 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
 
     table_rows = []
     for job in job_data:
+        # Determine job type and algorithm/model
+        job_args = job.get("arguments", {})
+        job_type = job_args.get("type", "harmonization" if "algorithm" in job_args else "prediction")
+        
+        # Get algorithm/model from parameters
+        if job_type == "harmonization":
+            algorithm = job_args.get("algorithm", "Unknown")
+        elif job_type == "prediction":
+            algorithm = job_args.get("model_name", "Unknown")
+        else:
+            algorithm = "N/A"
+        
         # Create status cell with error details if available
         status_content = job.get("status", "")
         if job.get("error_log") and job.get("status") == "failed":
@@ -318,6 +332,8 @@ def start_or_monitor_job(n_intervals, cancel_clicks, remove_clicks, cancel_ids, 
         
         table_rows.append(html.Tr([
             html.Td(job.get("start_time", "")),
+            html.Td(job_type.capitalize()),
+            html.Td(algorithm),
             html.Td(", ".join(job.get("arguments", {}).get("input_paths", []))),
             html.Td(status_content),
             html.Td(actions)

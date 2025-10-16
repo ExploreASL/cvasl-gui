@@ -446,6 +446,7 @@ def start_job(n_clicks, algorithm, label,
             job_parameters[param] = value
 
     job_arguments = {
+        "type": "harmonization",
         "algorithm": algorithm,
         "input_paths": data_store.input_files['harmonization'],
         "input_sites": data_store.input_sites['harmonization'],

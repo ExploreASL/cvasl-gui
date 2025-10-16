@@ -138,6 +138,7 @@ def start_job(n_clicks, model_name, selected_features, label):
         return dash.no_update, True
 
     job_arguments = {
+        "type": "prediction",
         "model_name": model_name,
         "train_paths": data_store.input_files['prediction-training'],
         "train_sites": data_store.input_sites['prediction-training'],

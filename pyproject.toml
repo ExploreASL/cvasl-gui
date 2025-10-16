@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cvasl-gui"
-version = "0.1.4"
+version = "0.0.0"  # Managed by setuptools-scm
 description = "A GUI for the cvasl package"
 authors = ["Peter Kok <p.kok@esciencecenter.nl>"]
 license = "Apache 2.0"
@@ -25,5 +25,10 @@ pyinstaller = "^6.11.0"
 cvasl-gui = "cvasl_gui.index:main"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0", "setuptools-scm>=8.0", "poetry-setuptools-scm-plugin"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.setuptools_scm]
+# Version is automatically derived from git tags
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"

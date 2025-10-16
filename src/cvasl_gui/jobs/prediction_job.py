@@ -165,6 +165,7 @@ def run_prediction() -> None:
     validation_names = [ os.path.splitext(os.path.basename(path))[0] for path in validation_paths ]
     validation_sites = job_arguments["validation_sites"]
     prediction_features = job_arguments["prediction_features"]
+    prediction_features = [x.lower() for x in prediction_features]
     prediction_parameters = job_arguments["parameters"]
     
     label = job_arguments["label"]

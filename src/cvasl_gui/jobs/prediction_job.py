@@ -151,11 +151,17 @@ def zip_job_output(job_id):
 
 def run_prediction() -> None:
     """Run the prediction process"""
+    
+    print("=" * 80)
+    print("STARTING PREDICTION JOB")
+    print("=" * 80)
 
     # Load job arguments
+    print("\n[1/10] Loading job arguments...")
     job_arguments_path = os.path.join(JOBS_DIR, job_id, "job_arguments.json")
     with open(job_arguments_path) as f:
         job_arguments = json.load(f)
+    print(f"   ✓ Job arguments loaded from: {job_arguments_path}")
 
     model_name = job_arguments["model_name"]
     train_paths = job_arguments["train_paths"]
@@ -172,58 +178,96 @@ def run_prediction() -> None:
     if label is None or label == "":
         label = "predicted"
 
+    print(f"   Model: {model_name}")
+    print(f"   Training datasets: {len(train_paths)}")
+    print(f"   Validation datasets: {len(validation_paths)}")
+    print(f"   Features: {prediction_features}")
+
     # Load the training datasets into pandas dataframes and concatenate them
+    print("\n[2/10] Loading and concatenating training data...")
     train_dfs = [pd.read_csv(path) for path in train_paths]
     train_dfs = pd.concat(train_dfs, ignore_index=True)
+    print(f"   ✓ Loaded {len(train_dfs)} training samples")
+    
+    print("\n[3/10] Loading and concatenating validation data...")
     validation_dfs = [pd.read_csv(path) for path in validation_paths]
     validation_dfs = pd.concat(validation_dfs, ignore_index=True)
-
-    print("Running prediction")
-    print("Train paths:", train_paths)
-    print("Validation paths:", validation_paths)
-    print("prediction features:", prediction_features)
+    print(f"   ✓ Loaded {len(validation_dfs)} validation samples")
 
     # Prepare train datasets
+    print("\n[4/10] Preparing training datasets...")
     mri_datasets_train = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=[])
                           for input_site, input_path in zip(train_sites, train_paths) ]
-    for mri_dataset in mri_datasets_train:
+    print(f"   ✓ Created {len(mri_datasets_train)} MRIdataset objects")
+    
+    print("\n[5/10] Preprocessing training datasets...")
+    for i, mri_dataset in enumerate(mri_datasets_train):
+        print(f"   Processing dataset {i+1}/{len(mri_datasets_train)}...")
         mri_dataset.preprocess()
+    print("   ✓ Preprocessing complete")
+    
+    print("\n[6/10] Encoding categorical features for training data...")
     features_to_map = ['sex']
     encode_cat_features(mri_datasets_train, features_to_map)
+    print("   ✓ Categorical features encoded")
 
     # Prepare test/validation datasets
+    print("\n[7/10] Preparing validation datasets...")
     mri_datasets_validation = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=[])
                                for input_site, input_path in zip(validation_sites, validation_paths) ]
-    for mri_dataset in mri_datasets_validation:
+    print(f"   ✓ Created {len(mri_datasets_validation)} validation MRIdataset objects")
+    
+    for i, mri_dataset in enumerate(mri_datasets_validation):
+        print(f"   Processing validation dataset {i+1}/{len(mri_datasets_validation)}...")
         mri_dataset.preprocess()
+    print("   ✓ Validation preprocessing complete")
+    
     features_to_map = ['sex']
     encode_cat_features(mri_datasets_validation, features_to_map)
+    print("   ✓ Validation categorical features encoded")
 
     # Instantiate the model
+    print(f"\n[8/10] Instantiating model: {model_name}...")
     model_class = prediction_models.get(model_name).get("class")
+    print(f"   Model class: {model_class.__name__}")
+    print(f"   Parameters: {prediction_parameters}")
     model = model_class(**prediction_parameters)
+    print("   ✓ Model instantiated successfully")
 
-    #TODO: not sure why this is necessary
     # Try to avoid the DataFrame ambiguity error by handling validation datasets carefully
     validation_datasets = mri_datasets_validation if mri_datasets_validation else None
     
     # Instantiate the predictor
+    print("\n[9/10] Creating PredictBrainAge predictor...")
     predicter = PredictBrainAge(model_name=model_name, model_file_name=model_name, model=model,
                                 datasets=mri_datasets_train, datasets_validation=validation_datasets, features=prediction_features,
                                 target='age', cat_category='sex', cont_category='age', n_bins=2, splits=1, test_size_p=0.05, random_state=42)
+    print("   ✓ Predictor created successfully")
 
     # Perform training and prediction
+    print("\n[10/10] Running prediction (this may take a while)...")
+    print("   Training model and making predictions...")
+    sys.stdout.flush()  # Force output to be written
+    
     metrics_df, metrics_df_val, predictions_df, predictions_df_val, models = predicter.predict()
+    
+    print("   ✓ Prediction complete!")
 
     # Some final processing & Write output
+    print("\nWriting output files...")
     output_folder = os.path.join(JOBS_DIR, job_id, 'output')
     os.makedirs(output_folder, exist_ok=True)
+    print(f"   Output folder: {output_folder}")
     
     # Save metrics
     if metrics_df is not None:
-        metrics_df.to_csv(os.path.join(output_folder, f"metrics_train_{label}.csv"), index=False)
+        metrics_path = os.path.join(output_folder, f"metrics_train_{label}.csv")
+        metrics_df.to_csv(metrics_path, index=False)
+        print(f"   ✓ Saved training metrics: {metrics_path}")
     if metrics_df_val is not None:
-        metrics_df_val.to_csv(os.path.join(output_folder, f"metrics_validation_{label}.csv"), index=False)
+        metrics_val_path = os.path.join(output_folder, f"metrics_validation_{label}.csv")
+        metrics_df_val.to_csv(metrics_val_path, index=False)
+        print(f"   ✓ Saved validation metrics: {metrics_val_path}")
     
     # Process and save predictions
     if predictions_df is not None:
@@ -234,7 +278,9 @@ def run_prediction() -> None:
             df['age_predicted'] = df['y_pred']
             df['age'] = df['y_test']
         df['label'] = label
-        df.to_csv(os.path.join(output_folder, f"predictions_train_{label}.csv"), index=False)
+        pred_path = os.path.join(output_folder, f"predictions_train_{label}.csv")
+        df.to_csv(pred_path, index=False)
+        print(f"   ✓ Saved training predictions: {pred_path}")
     
     if predictions_df_val is not None:
         # Add age_gap calculation if both age columns exist
@@ -244,7 +290,13 @@ def run_prediction() -> None:
             df['age_predicted'] = df['y_pred']
             df['age'] = df['y_test']
         df['label'] = label
-        df.to_csv(os.path.join(output_folder, f"predictions_validation_{label}.csv"), index=False)
+        pred_val_path = os.path.join(output_folder, f"predictions_validation_{label}.csv")
+        df.to_csv(pred_val_path, index=False)
+        print(f"   ✓ Saved validation predictions: {pred_val_path}")
+    
+    print("\n" + "=" * 80)
+    print("PREDICTION JOB COMPLETED SUCCESSFULLY")
+    print("=" * 80)
 
 
 def get_column_case_insensitive(df, colname):
@@ -255,24 +307,64 @@ def get_column_case_insensitive(df, colname):
 
 
 def process(job_id: str) -> None:
+    print(f"\n{'='*80}")
+    print(f"INITIALIZING JOB: {job_id}")
+    print(f"{'='*80}\n")
+    sys.stdout.flush()
+    
     write_job_status(job_id, "running")
-    print("Processing job", job_id)
 
     try:
         run_prediction()
+        
+        print("\nCreating output archive...")
+        sys.stdout.flush()
 
         # Zip the output
         zip_job_output(job_id)
+        print("✓ Output archive created successfully")
+        sys.stdout.flush()
 
+    except KeyboardInterrupt:
+        print("\n\nJob interrupted by user")
+        sys.stdout.flush()
+        write_job_status(job_id, "cancelled")
+        with open(os.path.join(JOBS_DIR, job_id, "error.log"), "w") as f:
+            f.write("Job cancelled by user\n")
+        return
+        
     except Exception as e:
+        print(f"\n\n{'='*80}")
+        print("ERROR: Job failed with exception")
+        print(f"{'='*80}")
+        print(f"Exception type: {type(e).__name__}")
+        print(f"Exception message: {str(e)}")
+        print(f"\nFull traceback:")
+        print(traceback.format_exc())
+        print(f"{'='*80}\n")
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
         write_job_status(job_id, "failed")
         with open(os.path.join(JOBS_DIR, job_id, "error.log"), "w") as f:
+            f.write(f"Exception type: {type(e).__name__}\n")
+            f.write(f"Exception message: {str(e)}\n\n")
+            f.write("Full traceback:\n")
             f.write(traceback.format_exc())
         return
     
     write_job_status(job_id, "completed")
+    print(f"\n{'='*80}")
+    print(f"JOB COMPLETED: {job_id}")
+    print(f"{'='*80}\n")
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("ERROR: No job ID provided")
+        print("Usage: python prediction_job.py <job_id>")
+        sys.exit(1)
+    
     job_id = sys.argv[1]
     process(job_id)

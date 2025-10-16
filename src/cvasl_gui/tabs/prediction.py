@@ -14,6 +14,8 @@ from cvasl_gui.components.data_table import create_data_table
 from cvasl_gui.components.feature_compare2 import create_feature_compare
 from cvasl_gui.components.job_list import create_job_list, get_job_status
 
+from cvasl_gui.jobs.prediction_job import prediction_models
+
 
 # Folder where job output files are stored
 WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
@@ -52,15 +54,13 @@ def get_dataframe_columns():
 
 def create_prediction_parameters():
     return [
-        # Row for algorithm selection
+        # Row for model selection
         dbc.Row([
             dbc.Col(html.Label("Model:", style={"marginTop": "6px"}), width=3),
             dbc.Col(
                 dcc.Dropdown(
                     id="model-dropdown",
-                    options=[
-                        {"label": "ExtraTrees", "value": "extratrees"},
-                    ],
+                    options=[{"label": v["label"], "value": k} for k, v in prediction_models.items()],
                     value="extratrees",
                     clearable=False,
                 ),
@@ -145,8 +145,9 @@ def start_job(n_clicks, model_name, selected_features, label):
         "train_sites": data_store.input_sites['prediction-training'],
         "validation_paths": data_store.input_files['prediction-testing'],
         "validation_sites": data_store.input_sites['prediction-testing'],
+        "prediction_features": selected_features,
         "parameters": {
-            "prediction_features": selected_features,
+            **prediction_models[model_name]["parameters"]
         },
         "label": label,
     }

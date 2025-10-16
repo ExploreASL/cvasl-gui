@@ -9,7 +9,10 @@ import pandas as pd
 from cvasl.prediction import PredictBrainAge
 from cvasl.dataset import MRIdataset, encode_cat_features
 
-from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor
+from sklearn.linear_model import LinearRegression, ElasticNetCV
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.svm import SVR
 
 # Monkey patch to fix the DataFrame ambiguity bug
 def _fixed_store_fold_predictions(self, fold_index, y_test, y_pred, y_val, y_pred_val, test_index):
@@ -47,6 +50,83 @@ WORKING_DIR = os.getenv("CVASL_WORKING_DIRECTORY", ".")
 INPUT_DIR = os.path.join(WORKING_DIR, 'data')
 JOBS_DIR = os.path.join(WORKING_DIR, 'jobs')
 
+prediction_models = {
+  "extratrees": {
+    "label": "Extra Trees Regressor",
+    "class": ExtraTreesRegressor,
+    "parameters": {
+        "n_estimators": 100,
+        "random_state": np.random.randint(0,100000),
+        "criterion": 'absolute_error',
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": 'log2',
+        "bootstrap": False,
+        "n_jobs": -1,
+        "warm_start": True
+    }
+  },
+  "gradientboosting": {
+    "label": "Gradient Boosting Regressor",
+    "class": GradientBoostingRegressor,
+    "parameters": {
+        "n_estimators": 100,
+        "learning_rate": 0.1,
+        "max_depth": 3,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "subsample": 1.0,
+        "random_state": np.random.randint(0, 100000),
+        "loss": 'squared_error'
+    }
+  },
+  "linearregression": {
+    "label": "Linear Regression",
+    "class": LinearRegression,
+    "parameters": {
+        "fit_intercept": True,
+        "n_jobs": -1
+    }
+  },
+  "elasticnetcv": {
+    "label": "Elastic Net CV",
+    "class": ElasticNetCV,
+    "parameters": {
+        "l1_ratio": [0.1, 0.5, 0.7, 0.9, 0.95, 0.99, 1],
+        "alphas": None,  # Automatically determined
+        "cv": 5,
+        "max_iter": 1000,
+        "tol": 0.0001,
+        "random_state": np.random.randint(0, 100000),
+        "n_jobs": -1
+    }
+  },
+  "decisiontree": {
+    "label": "Decision Tree Regressor", 
+    "class": DecisionTreeRegressor,
+    "parameters": {
+        "max_depth": None,  # No limit
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": None,  # Use all features
+        "random_state": np.random.randint(0, 100000),
+        "splitter": 'best'
+    }
+  },
+  "svr": {
+    "label": "Support Vector Regression",
+    "class": SVR,
+    "parameters": {
+        "kernel": 'rbf',
+        "C": 1.0,
+        "epsilon": 0.1,
+        "gamma": 'scale',
+        "tol": 0.001,
+        "cache_size": 200,
+        "max_iter": -1  # No limit
+    }
+  }
+}
 
 def write_job_status(job_id: str, status: str) -> None:
     """ Write the status of the job to a file (for use in the GUI)
@@ -76,17 +156,16 @@ def run_prediction() -> None:
     job_arguments_path = os.path.join(JOBS_DIR, job_id, "job_arguments.json")
     with open(job_arguments_path) as f:
         job_arguments = json.load(f)
+
+    model_name = job_arguments["model_name"]
     train_paths = job_arguments["train_paths"]
     train_names = [ os.path.splitext(os.path.basename(path))[0] for path in train_paths ]
     train_sites = job_arguments["train_sites"]
     validation_paths = job_arguments["validation_paths"]
     validation_names = [ os.path.splitext(os.path.basename(path))[0] for path in validation_paths ]
     validation_sites = job_arguments["validation_sites"]
-    model_name = job_arguments["model_name"] # TODO: actually use it
-
-    parameters = job_arguments["parameters"]
-    prediction_features = parameters["prediction_features"]
-    prediction_features = list(map(lambda x: x.lower(), prediction_features))
+    prediction_features = job_arguments["prediction_features"]
+    prediction_parameters = job_arguments["parameters"]
     
     label = job_arguments["label"]
     if label is None or label == "":
@@ -111,7 +190,7 @@ def run_prediction() -> None:
     features_to_map = ['sex']
     encode_cat_features(mri_datasets_train, features_to_map)
 
-    # Prepare test datasets
+    # Prepare test/validation datasets
     mri_datasets_validation = [MRIdataset(input_path, input_site, "participant_id", features_to_drop=[])
                                for input_site, input_path in zip(validation_sites, validation_paths) ]
     for mri_dataset in mri_datasets_validation:
@@ -119,15 +198,16 @@ def run_prediction() -> None:
     features_to_map = ['sex']
     encode_cat_features(mri_datasets_validation, features_to_map)
 
-    # Create model & predictor
-    model = ExtraTreesRegressor(n_estimators=100,random_state=np.random.randint(0,100000), criterion='absolute_error', min_samples_split=2,
-                                min_samples_leaf=1, max_features='log2',bootstrap=False, n_jobs=-1, warm_start=True)
-    
+    # Instantiate the model
+    model_class = prediction_models.get(model_name).get("class")
+    model = model_class(**prediction_parameters)
+
     #TODO: not sure why this is necessary
     # Try to avoid the DataFrame ambiguity error by handling validation datasets carefully
     validation_datasets = mri_datasets_validation if mri_datasets_validation else None
     
-    predicter = PredictBrainAge(model_name='extratree', model_file_name='extratree', model=model,
+    # Instantiate the predictor
+    predicter = PredictBrainAge(model_name=model_name, model_file_name=model_name, model=model,
                                 datasets=mri_datasets_train, datasets_validation=validation_datasets, features=prediction_features,
                                 target='age', cat_category='sex', cont_category='age', n_bins=2, splits=1, test_size_p=0.05, random_state=42)
 

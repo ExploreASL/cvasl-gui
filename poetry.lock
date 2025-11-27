@@ -515,14 +515,14 @@ toml = ["tomli"]
 
 [[package]]
 name = "cvasl"
-version = "0.1.8"
+version = "0.2.1"
 description = "A package for analysis of MRI"
 category = "main"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "cvasl-0.1.8-py3-none-any.whl", hash = "sha256:0021f9c7d483c303809181f09d866139284fd183d565a60c7bcbe44a0cba5b85"},
-    {file = "cvasl-0.1.8.tar.gz", hash = "sha256:6dcb4db35f5c77b244200c95fed7669dd760d03d093f9fe63aaa47605e5eb65f"},
+    {file = "cvasl-0.2.1-py3-none-any.whl", hash = "sha256:b92c63df5edaf3036f6af89182560e0fccf63ddf36d6c9b803c3734253b30f31"},
+    {file = "cvasl-0.2.1.tar.gz", hash = "sha256:5b3f3e68cb6ced297ab2cce98e673ffdf1769c38a42eaa8ec65a1f06390cb5c7"},
 ]
 
 [package.dependencies]
@@ -4291,4 +4291,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.14"
-content-hash = "f5800f1a577a3bd364e02b996bd617208fb8f8175f7cb333bfb8ac5b21d5237b"
+content-hash = "7e3c18f08817b080c7c8663547a582ee2d1e06e41d574a55172ba05fe9f15303"

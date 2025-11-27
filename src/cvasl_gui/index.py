@@ -7,6 +7,10 @@ from waitress import serve
 from dash import html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version
 
 from cvasl_gui import data_store
 from cvasl_gui.app import app
@@ -79,6 +83,21 @@ def main():
     debug_mode = False if is_frozen else os.getenv('CVASL_DEBUG_MODE', 'False') == 'True'
     path = os.getenv('CVASL_PATHNAME_PREFIX', '/')
     host = '127.0.0.1'
+
+    # Print version information (only in main process, not in reloader)
+    if not debug_mode or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        try:
+            gui_version = version('cvasl-gui')
+        except Exception:
+            gui_version = "unknown"
+        
+        try:
+            cvasl_version = version('cvasl')
+        except Exception:
+            cvasl_version = "unknown"
+        
+        print(f"CVASL GUI version: {gui_version}")
+        print(f"CVASL package version: {cvasl_version}")
 
     app.index_string = """
     <!DOCTYPE html>
